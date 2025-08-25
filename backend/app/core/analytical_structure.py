@@ -15,7 +15,7 @@ ANALYTICAL_FRAMEWORK = {
     "MARKET": {
         "factors": {
             "Market Size & Growth": ["total_addressable_market", "serviceable_addressable_market", "market_growth_rate", "future_projections"],
-            "Market Trends & Opportunities": ["emerging_trends", "technological_shifts", "white_space_opportunities", "macroeconomic_factors"],
+            "Market Trends & Opportunities": ["emerging_trends", "technological_shifts", "white_space_opportunities", "macroeconomic_factors", "perplexity_market_deep_dive"],
             "Competitive Landscape": ["key_competitors", "market_share_distribution", "competitor_strengths_weaknesses", "rival_intensity"],
             "Regulatory Environment": ["key_regulations", "compliance_requirements", "political_stability", "trade_policies"],
             "Market Risks & Challenges": ["economic_risks", "competitive_threats", "supply_chain_vulnerabilities", "market_volatility"]
@@ -63,6 +63,7 @@ LAYER_TO_AGENT_MAP = {
     "rival_intensity": "competitor_analysis",
     "emerging_trends": "trend_analysis",
     "technological_shifts": "trend_analysis",
+    "perplexity_market_deep_dive": "perplexity_research",  # New Perplexity-specific layer
     "pricing_strategy": "pricing_research",
     "cost_benefit_analysis": "pricing_research",
     #... add more specific overrides as needed

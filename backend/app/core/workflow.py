@@ -10,7 +10,7 @@ from .state import ValidatusState, AnalysisStatus, ResearchTask
 from .analytical_structure import ANALYTICAL_FRAMEWORK, LAYER_TO_AGENT_MAP
 from ..agents import (
     MarketResearchAgent, ConsumerInsightsAgent, CompetitorAnalysisAgent,
-    TrendAnalysisAgent, PricingResearchAgent
+    TrendAnalysisAgent, PricingResearchAgent, PerplexityResearchAgent
 )
 from ..scoring.layer_scorers import LayerScoringEngine
 from ..scoring.aggregators import ScoreAggregator
@@ -24,7 +24,8 @@ class ValidatusWorkflow:
             'consumer_insights': ConsumerInsightsAgent(),
             'competitor_analysis': CompetitorAnalysisAgent(),
             'trend_analysis': TrendAnalysisAgent(),
-            'pricing_research': PricingResearchAgent()
+            'pricing_research': PricingResearchAgent(),
+            'perplexity_research': PerplexityResearchAgent()
         }
         self.query_parser = QueryParser()
         self.scoring_engine = LayerScoringEngine()

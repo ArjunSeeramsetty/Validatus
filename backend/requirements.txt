@@ -22,3 +22,5 @@ newsapi-python>=0.2.6
 transformers>=4.30.0
 torch>=2.0.0
 scipy>=1.10.0
+httpx>=0.25.0
+python-dotenv>=1.0.0
