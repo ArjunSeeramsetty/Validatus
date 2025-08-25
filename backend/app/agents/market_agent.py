@@ -1,11 +1,26 @@
 import asyncio
 import httpx
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timedelta
 import openai
+import pandas as pd
+import numpy as np
 from .base_agent import BaseResearchAgent
 from ..utils.nlp import QueryParser
 from config import settings
+
+# Enhanced imports for production features
+try:
+    from pytrends.request import TrendReq
+    PYTENDS_AVAILABLE = True
+except ImportError:
+    PYTENDS_AVAILABLE = False
+
+try:
+    from newsapi import NewsApiClient
+    NEWSAPI_AVAILABLE = True
+except ImportError:
+    NEWSAPI_AVAILABLE = False
 
 class MarketResearchAgent(BaseResearchAgent):
     """Specialized agent for market research and analysis with multiple data sources"""
@@ -13,6 +28,17 @@ class MarketResearchAgent(BaseResearchAgent):
     def __init__(self):
         super().__init__()
         self.query_parser = QueryParser()
+        
+        # Initialize enhanced data sources
+        if PYTENDS_AVAILABLE:
+            self.pytrends = TrendReq(hl='en-US', tz=360, timeout=(10,25), retries=2, backoff_factor=0.1)
+        else:
+            self.pytrends = None
+            
+        if NEWSAPI_AVAILABLE and hasattr(settings, 'NEWS_API_KEY'):
+            self.news_client = NewsApiClient(api_key=settings.NEWS_API_KEY)
+        else:
+            self.news_client = None
         
     async def research(self, query: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Conduct comprehensive market research using multiple sources"""
@@ -89,22 +115,28 @@ class MarketResearchAgent(BaseResearchAgent):
             return {"error": f"Alternative search failed: {str(e)}", "results": []}
     
     async def _analyze_trends(self, query: str, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Analyze market trends using multiple approaches"""
+        """Analyze market trends using multiple approaches with real data"""
         try:
             # Extract keywords for trend analysis
             keywords = await self.query_parser.extract_keywords(query)
-            geography = context.get("geography", [""])
+            geography = context.get("geography", ["US"])
             
-            # Use Google Trends (simplified for demo)
-            trend_data = await self._get_google_trends(keywords[:3], geography)
+            # Enhanced Google Trends analysis
+            trend_data = await self._get_enhanced_google_trends(keywords[:3], geography)
             
-            # Use news API for recent trends
-            news_trends = await self._get_news_trends(keywords, geography)
+            # Enhanced news trends analysis
+            news_trends = await self._get_enhanced_news_trends(keywords, geography)
+            
+            # Calculate trend momentum and insights
+            trend_insights = self._calculate_trend_insights(trend_data, news_trends)
             
             return {
                 "google_trends": trend_data,
                 "news_trends": news_trends,
-                "keywords_analyzed": keywords[:3]
+                "trend_insights": trend_insights,
+                "keywords_analyzed": keywords[:3],
+                "overall_momentum": trend_insights.get("overall_momentum", 0),
+                "trend_confidence": self._calculate_trend_confidence(trend_data, news_trends)
             }
         except Exception as e:
             return {"error": f"Trend analysis failed: {str(e)}"}
@@ -236,11 +268,217 @@ class MarketResearchAgent(BaseResearchAgent):
         return min(0.9, 0.5 + (len(results) * 0.1))
 
     async def _get_google_trends(self, keywords: List[str], geography: List[str]) -> Dict[str, Any]:
-        """Get Google Trends data (simplified implementation)"""
-        # This would use pytrends in a thread pool for production
-        return {"trend_data": "Google Trends data", "keywords": keywords}
+        """Enhanced Google Trends analysis with real data"""
+        if not self.pytrends or not PYTENDS_AVAILABLE:
+            return {"trend_data": "Google Trends not available", "keywords": keywords}
+        
+        try:
+            # Map geography to Google Trends format
+            geo_code = self._map_geography_to_trends_code(geography)
+            
+            # Multiple timeframes for comprehensive analysis
+            timeframes = ['today 12-m', 'today 3-m', 'today 1-m']
+            trend_data = {}
+            
+            for timeframe in timeframes:
+                try:
+                    self.pytrends.build_payload(
+                        keywords[:5],  # Google Trends limit
+                        cat=0,
+                        timeframe=timeframe,
+                        geo=geo_code,
+                        gprop=''
+                    )
+                    
+                    # Interest over time
+                    interest_data = self.pytrends.interest_over_time()
+                    if not interest_data.empty:
+                        trend_data[timeframe] = {
+                            "interest_over_time": interest_data.to_dict(),
+                            "momentum": self._calculate_trend_momentum(interest_data),
+                            "data_points": len(interest_data)
+                        }
+                    
+                    # Related queries
+                    try:
+                        related_queries = self.pytrends.related_queries()
+                        trend_data[timeframe]["related_queries"] = related_queries
+                    except:
+                        trend_data[timeframe]["related_queries"] = {}
+                    
+                    await asyncio.sleep(1)  # Rate limiting
+                    
+                except Exception as e:
+                    trend_data[timeframe] = {"error": str(e)}
+            
+            return {
+                "trend_data": trend_data,
+                "keywords_analyzed": keywords,
+                "geography": geo_code
+            }
+            
+        except Exception as e:
+            return {"error": f"Google Trends analysis failed: {str(e)}"}
 
     async def _get_news_trends(self, keywords: List[str], geography: List[str]) -> Dict[str, Any]:
-        """Get recent news trends"""
-        # This would use a news API
-        return {"news_trends": "Recent news analysis", "keywords": keywords}
+        """Enhanced news analysis using NewsAPI"""
+        if not self.news_client or not NEWSAPI_AVAILABLE:
+            return {"news_trends": "News API not available", "keywords": keywords}
+        
+        try:
+            # Multiple news searches for comprehensive coverage
+            news_searches = [
+                {"q": " OR ".join(keywords[:3]), "language": "en", "sort_by": "relevancy"},
+                {"q": " OR ".join(keywords[:3]), "language": "en", "sort_by": "publishedAt"},
+                {"domains": "reuters.com,bloomberg.com,wsj.com", "q": keywords[0], "language": "en"}
+            ]
+            
+            all_articles = []
+            for search_params in news_searches:
+                try:
+                    response = self.news_client.get_everything(
+                        **search_params,
+                        from_param=(datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'),
+                        to=datetime.now().strftime('%Y-%m-%d'),
+                        page_size=20
+                    )
+                    
+                    if response['status'] == 'ok':
+                        all_articles.extend(response['articles'])
+                        
+                except Exception as e:
+                    continue
+            
+            # Process articles for insights
+            processed_articles = self._process_news_articles(all_articles)
+            
+            return {
+                "articles": processed_articles,
+                "article_count": len(processed_articles),
+                "sources": list(set([article.get('source', {}).get('name', '') for article in processed_articles])),
+                "confidence": min(len(processed_articles) / 50, 1.0)  # Confidence based on article count
+            }
+            
+        except Exception as e:
+            return {"error": f"News analysis failed: {str(e)}"}
+
+    def _map_geography_to_trends_code(self, geography: List[str]) -> str:
+        """Map geography to Google Trends country codes"""
+        if not geography:
+            return "US"
+        
+        # Simple mapping - can be expanded
+        geo_mapping = {
+            "US": "US", "United States": "US", "USA": "US",
+            "UK": "GB", "United Kingdom": "GB", "Great Britain": "GB",
+            "CA": "CA", "Canada": "CA",
+            "AU": "AU", "Australia": "AU",
+            "DE": "DE", "Germany": "DE",
+            "FR": "FR", "France": "FR"
+        }
+        
+        for geo in geography:
+            if geo in geo_mapping:
+                return geo_mapping[geo]
+        
+        return "US"  # Default to US
+
+    def _calculate_trend_momentum(self, interest_data: pd.DataFrame) -> Dict[str, float]:
+        """Calculate trend momentum with statistical rigor"""
+        if interest_data.empty:
+            return {"momentum": 0, "direction": "neutral"}
+        
+        try:
+            # Calculate momentum using linear regression
+            for column in interest_data.columns:
+                if column != 'isPartial':
+                    values = interest_data[column].dropna().values
+                    if len(values) > 1:
+                        x = np.arange(len(values))
+                        slope, _ = np.polyfit(x, values, 1)
+                        
+                        # Normalize slope to momentum score
+                        momentum = np.tanh(slope / 10)  # Sigmoid normalization
+                        direction = "positive" if slope > 0 else "negative" if slope < 0 else "neutral"
+                        
+                        return {
+                            "momentum": float(momentum),
+                            "direction": direction,
+                            "slope": float(slope),
+                            "data_points": len(values)
+                        }
+        except Exception:
+            pass
+        
+        return {"momentum": 0, "direction": "neutral"}
+
+    def _process_news_articles(self, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Process news articles for analysis"""
+        processed = []
+        for article in articles[:50]:  # Limit to 50 articles
+            processed.append({
+                "title": article.get("title", ""),
+                "description": article.get("description", ""),
+                "content": article.get("content", ""),
+                "source": article.get("source", {}).get("name", ""),
+                "published_at": article.get("publishedAt", ""),
+                "url": article.get("url", "")
+            })
+        return processed
+
+    def _calculate_trend_insights(self, trend_data: Dict[str, Any], news_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculate comprehensive trend insights"""
+        insights = {
+            "overall_momentum": 0,
+            "trend_strength": "weak",
+            "key_insights": []
+        }
+        
+        # Analyze Google Trends momentum
+        if "trend_data" in trend_data and not "error" in trend_data:
+            momentums = []
+            for timeframe, data in trend_data["trend_data"].items():
+                if "momentum" in data and "momentum" in data["momentum"]:
+                    momentums.append(data["momentum"]["momentum"])
+            
+            if momentums:
+                insights["overall_momentum"] = float(np.mean(momentums))
+                
+                # Determine trend strength
+                avg_momentum = abs(insights["overall_momentum"])
+                if avg_momentum > 0.7:
+                    insights["trend_strength"] = "strong"
+                elif avg_momentum > 0.4:
+                    insights["trend_strength"] = "moderate"
+                else:
+                    insights["trend_strength"] = "weak"
+        
+        # Analyze news volume
+        if "article_count" in news_data:
+            article_count = news_data["article_count"]
+            if article_count > 30:
+                insights["key_insights"].append("High media coverage indicates strong market interest")
+            elif article_count > 15:
+                insights["key_insights"].append("Moderate media coverage suggests growing market awareness")
+            else:
+                insights["key_insights"].append("Limited media coverage may indicate early market stage")
+        
+        return insights
+
+    def _calculate_trend_confidence(self, trend_data: Dict[str, Any], news_data: Dict[str, Any]) -> float:
+        """Calculate confidence in trend analysis"""
+        confidence_factors = []
+        
+        # Google Trends confidence
+        if "trend_data" in trend_data and not "error" in trend_data:
+            valid_timeframes = sum(1 for data in trend_data["trend_data"].values() if "error" not in data)
+            total_timeframes = len(trend_data["trend_data"])
+            if total_timeframes > 0:
+                confidence_factors.append(valid_timeframes / total_timeframes)
+        
+        # News confidence
+        if "article_count" in news_data:
+            article_count = news_data["article_count"]
+            confidence_factors.append(min(article_count / 30, 1.0))
+        
+        return float(np.mean(confidence_factors)) if confidence_factors else 0.5

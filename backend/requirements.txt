@@ -16,3 +16,9 @@ tavily-python==0.3.3
 beautifulsoup4==4.12.3
 spacy==3.7.4
 # python -m spacy download en_core_web_sm
+
+# Enhanced AI & Research
+newsapi-python>=0.2.6
+transformers>=4.30.0
+torch>=2.0.0
+scipy>=1.10.0
