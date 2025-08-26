@@ -11,7 +11,7 @@ from datetime import datetime
 import json
 
 from .multi_llm_orchestrator import MultiLLMOrchestrator
-from .strategic_scoring_v3 import StrategicScoringEngineV3, StrategicAnalysisResultV3
+from .strategic_scoring_v4 import StrategicScoringV4, StrategicAnalysisResultV4
 from .knowledge_graph_analyzer import KnowledgeGraphAnalyzer
 
 class EnhancedValidatusOrchestrator:
@@ -24,7 +24,7 @@ class EnhancedValidatusOrchestrator:
         
         # Initialize core components
         self.llm_orchestrator = MultiLLMOrchestrator()
-        self.scoring_engine = StrategicScoringEngineV3()  # Updated to V3
+        self.scoring_engine = StrategicScoringV4(self.llm_orchestrator)  # Updated to V4 with LLM orchestrator
         self.knowledge_graph = KnowledgeGraphAnalyzer()
         
         self.logger.info("Enhanced Validatus Orchestrator initialized")
@@ -50,10 +50,13 @@ class EnhancedValidatusOrchestrator:
             
             # Step 2: Strategic Framework Analysis
             self.logger.info("Step 2: Executing strategic framework analysis")
-            strategic_analysis = await self.scoring_engine.analyze_strategic_framework(
-                llm_analysis=llm_analysis,
-                query=query,
-                context=context
+            strategic_analysis = await self.scoring_engine.run(
+                state={
+                    "llm_analysis": llm_analysis,
+                    "query": query,
+                    "context": context,
+                    "idea_description": query
+                }
             )
             
             # Step 3: Knowledge Graph Integration (if available)
@@ -83,7 +86,7 @@ class EnhancedValidatusOrchestrator:
     
     async def _integrate_knowledge_graph(self,
                                        query: str,
-                                       strategic_analysis: StrategicAnalysisResultV3,
+                                       strategic_analysis: Dict[str, Any],
                                        context: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         Integrate knowledge graph insights with strategic analysis
@@ -103,24 +106,30 @@ class EnhancedValidatusOrchestrator:
             self.logger.warning(f"Knowledge graph integration failed: {e}")
             return {"entities": [], "relationships": [], "insights": []}
     
-    def _extract_entities_from_analysis(self, strategic_analysis: StrategicAnalysisResultV3) -> List[str]:
+    def _extract_entities_from_analysis(self, strategic_analysis: Dict[str, Any]) -> List[str]:
         """
         Extract key entities from strategic analysis for knowledge graph querying
         """
         entities = []
         
-        # Extract from extracted metrics
-        for metric in strategic_analysis.extracted_metrics:
-            if hasattr(metric.value, '__str__'):
-                entities.append(str(metric.value))
+        # Extract from dimension scores
+        for dimension_score in strategic_analysis.get("dimension_scores", []):
+            if hasattr(dimension_score, 'dimension'):
+                entities.append(dimension_score.dimension.value)
+            elif isinstance(dimension_score, dict):
+                entities.append(dimension_score.get("dimension", "unknown"))
         
-        # Extract from framework scores
-        for framework_score in strategic_analysis.framework_scores:
-            entities.append(framework_score.framework.value)
+        # Extract from key insights and recommendations
+        entities.extend(strategic_analysis.get("key_strengths", []))
+        entities.extend(strategic_analysis.get("key_weaknesses", []))
+        entities.extend(strategic_analysis.get("strategic_recommendations", []))
         
-        # Extract from insights and recommendations
-        entities.extend(strategic_analysis.key_insights)
-        entities.extend(strategic_analysis.strategic_recommendations)
+        # Extract from market positioning and competitive advantage
+        entities.append(strategic_analysis.get("market_positioning", ""))
+        entities.append(strategic_analysis.get("competitive_advantage", ""))
+        
+        # Filter out empty strings and convert to strings
+        entities = [str(entity) for entity in entities if entity and str(entity).strip()]
         
         return list(set(entities))  # Remove duplicates
     
@@ -128,7 +137,7 @@ class EnhancedValidatusOrchestrator:
                                            query: str,
                                            context: Dict[str, Any],
                                            llm_analysis: Dict[str, Any],
-                                           strategic_analysis: StrategicAnalysisResultV3,
+                                           strategic_analysis: Dict[str, Any],
                                            knowledge_insights: Dict[str, Any],
                                            analysis_type: str,
                                            start_time: datetime) -> Dict[str, Any]:
@@ -137,8 +146,8 @@ class EnhancedValidatusOrchestrator:
         """
         processing_time = (datetime.now() - start_time).total_seconds()
         
-        # Convert strategic analysis to serializable format
-        strategic_analysis_dict = self._convert_strategic_analysis_to_dict(strategic_analysis)
+        # Strategic analysis is already in dict format for V4
+        strategic_analysis_dict = strategic_analysis
         
         return {
             "query": query,
@@ -158,92 +167,39 @@ class EnhancedValidatusOrchestrator:
             
             # Executive Summary
             "executive_summary": {
-                "overall_score": strategic_analysis.overall_score,
-                "overall_confidence": strategic_analysis.overall_confidence,
-                "strategic_position": strategic_analysis.strategic_position,
-                "key_insights": strategic_analysis.key_insights[:5],  # Top 5 insights
-                "top_recommendations": strategic_analysis.strategic_recommendations[:3],  # Top 3 recommendations
-                "risk_level": strategic_analysis.risk_assessment.get("overall_risk_level", "medium"),
-                "opportunity_level": strategic_analysis.opportunity_analysis.get("overall_opportunity_level", "medium")
+                "overall_score": strategic_analysis.get("overall_viability_score", 0),
+                "overall_confidence": 0.8,  # Default confidence for V4
+                "strategic_position": strategic_analysis.get("market_positioning", "Standard positioning"),
+                "key_insights": strategic_analysis.get("key_strengths", [])[:5],  # Top 5 strengths
+                "top_recommendations": strategic_analysis.get("strategic_recommendations", [])[:3],  # Top 3 recommendations
+                "risk_level": strategic_analysis.get("risk_assessment", {}).get("overall_risk_level", "medium"),
+                "opportunity_level": strategic_analysis.get("opportunity_analysis", {}).get("overall_opportunity_level", "medium")
             },
             
             # Framework Breakdown
             "framework_breakdown": {
-                framework_score.framework.value: {
-                    "score": framework_score.score,
-                    "confidence": framework_score.confidence,
-                    "reasoning": framework_score.reasoning,
-                    "metrics_used": len(framework_score.metrics_used)
+                dimension_score.dimension.value: {
+                    "score": dimension_score.score,
+                    "confidence": dimension_score.confidence,
+                    "reasoning": dimension_score.rationale,
+                    "metrics_used": 0  # V4 doesn't use metrics in the same way
                 }
-                for framework_score in strategic_analysis.framework_scores
+                for dimension_score in strategic_analysis.get("dimension_scores", [])
+                if hasattr(dimension_score, 'dimension')
             },
             
             # Metrics Summary
             "metrics_summary": {
-                "total_metrics_extracted": len(strategic_analysis.extracted_metrics),
-                "metrics_by_framework": {
-                    framework_score.framework.value: len(framework_score.metrics_used)
-                    for framework_score in strategic_analysis.framework_scores
+                "total_dimensions_analyzed": len(strategic_analysis.get("dimension_scores", [])),
+                "dimensions_by_category": {
+                    dimension_score.dimension.value: 1
+                    for dimension_score in strategic_analysis.get("dimension_scores", [])
+                    if hasattr(dimension_score, 'dimension')
                 }
             }
         }
     
-    def _convert_strategic_analysis_to_dict(self, strategic_analysis: StrategicAnalysisResultV3) -> Dict[str, Any]:
-        """
-        Convert StrategicAnalysisResultV3 to a serializable dictionary
-        """
-        return {
-            "query": strategic_analysis.query,
-            "context": strategic_analysis.context,
-            "overall_score": strategic_analysis.overall_score,
-            "overall_confidence": strategic_analysis.overall_confidence,
-            "strategic_position": strategic_analysis.strategic_position,
-            "key_insights": strategic_analysis.key_insights,
-            "strategic_recommendations": strategic_analysis.strategic_recommendations,
-            "risk_assessment": strategic_analysis.risk_assessment,
-            "opportunity_analysis": strategic_analysis.opportunity_analysis,
-            "timestamp": strategic_analysis.timestamp.isoformat(),
-            "processing_time": strategic_analysis.processing_time,
-            
-            # Framework scores
-            "framework_scores": [
-                {
-                    "framework": fs.framework.value,
-                    "score": fs.score,
-                    "confidence": fs.confidence,
-                    "calculation_method": fs.calculation_method,
-                    "reasoning": fs.reasoning,
-                    "timestamp": fs.timestamp.isoformat(),
-                    "metrics_used": [
-                        {
-                            "metric": em.metric.value,
-                            "value": em.value,
-                            "unit": em.unit,
-                            "confidence": em.confidence,
-                            "source_text": em.source_text[:200] + "..." if len(em.source_text) > 200 else em.source_text,
-                            "extraction_method": em.extraction_method,
-                            "timestamp": em.timestamp.isoformat()
-                        }
-                        for em in fs.metrics_used
-                    ]
-                }
-                for fs in strategic_analysis.framework_scores
-            ],
-            
-            # Extracted metrics
-            "extracted_metrics": [
-                {
-                    "metric": em.metric.value,
-                    "value": em.value,
-                    "unit": em.unit,
-                    "confidence": em.confidence,
-                    "source_text": em.source_text[:200] + "..." if len(em.source_text) > 200 else em.source_text,
-                    "extraction_method": em.extraction_method,
-                    "timestamp": em.timestamp.isoformat()
-                }
-                for em in strategic_analysis.extracted_metrics
-            ]
-        }
+
     
     async def health_check(self) -> Dict[str, Any]:
         """
@@ -269,8 +225,9 @@ class EnhancedValidatusOrchestrator:
                 # Simple health check for scoring engine
                 health_status["components"]["strategic_scoring_engine"] = {
                     "status": "healthy",
-                    "frameworks_supported": len(self.scoring_engine.framework_metrics),
-                    "metrics_supported": sum(len(metrics) for metrics in self.scoring_engine.framework_metrics.values())
+                    "version": "V4",
+                    "method": "LLM-Based Qualitative Analysis",
+                    "dimensions_supported": 8  # Number of strategic dimensions in V4
                 }
             except Exception as e:
                 health_status["components"]["strategic_scoring_engine"] = {"status": "unhealthy", "error": str(e)}

@@ -46,7 +46,11 @@ class OpenAIAgent:
         start_time = datetime.now()
         
         try:
-            system_prompt = self._build_system_prompt(context)
+            # Check if this is a strategic scoring request that needs JSON output
+            if context and context.get("output_format") == "structured_json":
+                system_prompt = self._build_json_prompt(query, context)
+            else:
+                system_prompt = self._build_system_prompt(context)
             
             response = await self.client.chat.completions.create(
                 model=self.model,
@@ -182,6 +186,39 @@ class OpenAIAgent:
         """Estimate cost based on token usage"""
         cost_per_1k = 0.005  # $0.005 per 1K tokens
         return (tokens / 1000) * cost_per_1k
+    
+    def _build_json_prompt(self, query: str, context: Dict[str, Any] = None) -> str:
+        """Build a prompt specifically for JSON-structured strategic analysis"""
+        return f"""You are an expert business strategist. Analyze: "{query}"
+
+CRITICAL: Return ONLY valid JSON with this EXACT structure:
+
+{{
+  "overall_viability_score": {{"score": 7, "rationale": "Your assessment"}},
+  "market_potential": {{"score": 8, "rationale": "Market analysis"}},
+  "competitive_landscape": {{"score": 6, "rationale": "Competitive analysis"}},
+  "consumer_alignment": {{"score": 8, "rationale": "Consumer insights"}},
+  "innovation_uniqueness": {{"score": 7, "rationale": "Innovation assessment"}},
+  "financial_viability": {{"score": 7, "rationale": "Financial analysis"}},
+  "operational_feasibility": {{"score": 6, "rationale": "Operational assessment"}},
+  "risk_mitigation": {{"score": 6, "rationale": "Risk analysis"}},
+  "key_strengths": ["Strength 1", "Strength 2", "Strength 3"],
+  "key_weaknesses": ["Weakness 1", "Weakness 2", "Weakness 3"],
+  "strategic_recommendations": ["Rec 1", "Rec 2", "Rec 3"],
+  "market_positioning": "Positioning strategy",
+  "competitive_advantage": "Competitive advantage",
+  "success_factors": ["Factor 1", "Factor 2", "Factor 3"],
+  "critical_risks": ["Risk 1", "Risk 2", "Risk 3"]
+}}
+
+RULES:
+- NO text before or after JSON
+- Use ONLY the structure above
+- All scores must be integers 1-10
+- All strings must be in quotes
+- NO trailing commas
+
+Return ONLY the JSON object."""
 
 class AnthropicAgent:
     """Anthropic Claude agent for strategic analysis with current market focus"""
@@ -525,26 +562,50 @@ class GoogleGeminiAgent:
     
     def __init__(self, model: str = 'gemini-2.5-pro'):
         self.model = model
-        genai.configure(api_key=settings.GOOGLE_GEMINI_API_KEY)
-        self.model_instance = genai.GenerativeModel(model)
+        # Don't configure API key here - do it just before the API call
+        self.model_instance = None
         self.logger = logging.getLogger(f"llm.gemini.{model}")
     
     async def analyze(self, query: str, context: Dict[str, Any] = None) -> LLMAnalysisResult:
-        """Analyze query using Google Gemini"""
+        """Analyze query using Google Gemini with improved safety settings"""
         start_time = datetime.now()
         
         try:
+            # Configure API key just before the call
+            if not hasattr(settings, 'GOOGLE_GEMINI_API_KEY') or not settings.GOOGLE_GEMINI_API_KEY:
+                raise ValueError("Google Gemini API key is not configured")
+            
+            # Configure Gemini with API key
+            genai.configure(api_key=settings.GOOGLE_GEMINI_API_KEY)
+            
+            # Initialize model instance if not already done
+            if self.model_instance is None:
+                self.model_instance = genai.GenerativeModel(self.model)
+            
             # Prepare the prompt
             prompt = self._build_prompt(query, context)
             
-            # Generate content using Gemini
-            response = await self.model_instance.generate_content_async(prompt)
+            # FIX: Use less restrictive safety settings for business analysis
+            safety_settings = [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            ]
+            
+            # Generate content using Gemini with adjusted safety settings
+            response = await self.model_instance.generate_content_async(prompt, safety_settings=safety_settings)
             
             # Validate response
             if not response or not response.candidates:
                 raise ValueError("No response candidates from Gemini")
             
             candidate = response.candidates[0]
+            
+            # Check for content policy blocks
+            if hasattr(response, 'prompt_feedback') and response.prompt_feedback and response.prompt_feedback.block_reason:
+                raise ValueError(f"Gemini response blocked due to: {response.prompt_feedback.block_reason}")
+            
             if candidate.finish_reason not in [0, 1]:  # 0 = SUCCESS, 1 = STOP (both are valid)
                 raise ValueError(f"Gemini response blocked: finish_reason={candidate.finish_reason}")
             
@@ -552,7 +613,13 @@ class GoogleGeminiAgent:
             if candidate.content and candidate.content.parts:
                 generated_text = candidate.content.parts[0].text
             else:
-                raise ValueError("No content parts in Gemini response")
+                # Try alternative extraction methods
+                if hasattr(candidate, 'text'):
+                    generated_text = candidate.text
+                elif hasattr(response, 'text'):
+                    generated_text = response.text
+                else:
+                    raise ValueError("No content parts in Gemini response")
             
             # Parse the response
             parsed_result = self._parse_gemini_response(generated_text)
@@ -568,44 +635,95 @@ class GoogleGeminiAgent:
                 execution_time=execution_time,
                 cost=0.0,  # Gemini doesn't provide token usage in the same way
                 timestamp=datetime.now(),
-                metadata={"parsing_method": "structured_extraction"}
+                metadata={"parsing_method": "structured_extraction", "market_focus": "current"}
             )
             
         except Exception as e:
             self.logger.error(f"Google Gemini analysis failed: {e}")
             execution_time = (datetime.now() - start_time).total_seconds()
+            
+            # Try to provide a more helpful error message
+            error_msg = f"Analysis failed: {str(e)}"
+            if "No content parts" in str(e):
+                error_msg = "Analysis failed: Gemini response format issue - using fallback analysis"
+            elif "API key" in str(e):
+                error_msg = "Analysis failed: Gemini API key configuration issue"
+            elif "blocked" in str(e):
+                error_msg = "Analysis failed: Gemini content policy blocked the response"
+            
             return LLMAnalysisResult(
                 model_name=f"Google-{self.model}",
-                analysis=f"Analysis failed: {str(e)}",
+                analysis=error_msg,
                 confidence=0.0,
                 key_insights=[],
                 recommendations=[],
                 execution_time=execution_time,
                 cost=0.0,
                 timestamp=datetime.now(),
-                metadata={"error": str(e)}
+                metadata={"error": str(e), "market_focus": "current", "fallback_used": True}
             )
     
     def _build_prompt(self, query: str, context: Dict[str, Any] = None) -> str:
-        """Build a comprehensive prompt for Gemini analysis"""
-        system_prompt = """You are a business consultant providing strategic analysis. 
-        Please analyze the given business query and provide a structured response with:
+        """Build a controlled prompt for Gemini analysis ensuring proper JSON output"""
         
-        1. Key business insights (3-5 bullet points)
-        2. Strategic recommendations (3-5 bullet points)
-        3. Confidence level (0.0-1.0)
-        4. Brief reasoning for your analysis
-        5. Data sources you would typically use for such analysis
+        # Check if this is a strategic scoring request that needs JSON output
+        if "strategic_scoring" in query.lower() or "json" in query.lower():
+            return self._build_json_prompt(query, context)
         
-        Keep your response professional, factual, and business-focused. 
-        Avoid any content that could be considered sensitive or controversial.
-        Focus on business strategy, market analysis, and operational insights."""
+        # Standard analysis prompt
+        system_prompt = """You are an expert strategic analyst. Focus on CURRENT market conditions (last 6-12 months).
+
+Provide analysis with:
+1. Key business insights (3-5 bullet points)
+2. Strategic recommendations (3-5 bullet points) 
+3. Confidence level (0.0-1.0)
+4. Brief reasoning
+5. Data sources
+
+Keep response professional and business-focused."""
         
         context_str = ""
         if context:
             context_str = f"\n\nBusiness Context: {json.dumps(context, indent=2)}"
         
-        return f"{system_prompt}\n\nBusiness Query: {query}{context_str}"
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        market_context = f"\n\nANALYSIS DATE: {current_date}"
+        market_context += "\nMARKET CONTEXT: Current market conditions and recent developments (last 6-12 months)"
+        
+        return f"{system_prompt}\n\nBusiness Query: {query}{context_str}{market_context}"
+    
+    def _build_json_prompt(self, query: str, context: Dict[str, Any] = None) -> str:
+        """Build a prompt specifically for JSON-structured strategic analysis"""
+        return f"""You are an expert business strategist. Analyze: "{query}"
+
+CRITICAL: Return ONLY valid JSON with this EXACT structure:
+
+{{
+  "overall_viability_score": {{"score": 7, "rationale": "Your assessment"}},
+  "market_potential": {{"score": 8, "rationale": "Market analysis"}},
+  "competitive_landscape": {{"score": 6, "rationale": "Competitive analysis"}},
+  "consumer_alignment": {{"score": 8, "rationale": "Consumer insights"}},
+  "innovation_uniqueness": {{"score": 7, "rationale": "Innovation assessment"}},
+  "financial_viability": {{"score": 7, "rationale": "Financial analysis"}},
+  "operational_feasibility": {{"score": 6, "rationale": "Operational assessment"}},
+  "risk_mitigation": {{"score": 6, "rationale": "Risk analysis"}},
+  "key_strengths": ["Strength 1", "Strength 2", "Strength 3"],
+  "key_weaknesses": ["Weakness 1", "Weakness 2", "Weakness 3"],
+  "strategic_recommendations": ["Rec 1", "Rec 2", "Rec 3"],
+  "market_positioning": "Positioning strategy",
+  "competitive_advantage": "Competitive advantage",
+  "success_factors": ["Factor 1", "Factor 2", "Factor 3"],
+  "critical_risks": ["Risk 1", "Risk 2", "Risk 3"]
+}}
+
+RULES:
+- NO text before or after JSON
+- Use ONLY the structure above
+- All scores must be integers 1-10
+- All strings must be in quotes
+- NO trailing commas
+
+Return ONLY the JSON object."""
     
     def _parse_gemini_response(self, response_text: str) -> Dict[str, Any]:
         """Parse Gemini response to extract structured data"""
@@ -751,7 +869,7 @@ class GoogleGeminiAgent:
         return (word_count / 1000) * cost_per_1k_words
 
 class MultiLLMOrchestrator:
-    """Orchestrate multiple LLMs for comprehensive analysis"""
+    """Orchestrate multiple LLMs for comprehensive analysis with robust fallback chain"""
     
     def __init__(self, consensus_method: ConsensusMethod = ConsensusMethod.CONFIDENCE_BASED):
         self.consensus_method = consensus_method
@@ -760,6 +878,9 @@ class MultiLLMOrchestrator:
         # Initialize LLM agents
         self.llm_agents = {}
         self._initialize_agents()
+        
+        # Fallback chain priority (order matters)
+        self.fallback_chain = ['google_gemini', 'perplexity_sonar', 'anthropic_claude', 'openai_gpt4']
     
     def _initialize_agents(self):
         """Initialize available LLM agents based on API keys"""
@@ -797,11 +918,104 @@ class MultiLLMOrchestrator:
         
         self.logger.info(f"Initialized {len(self.llm_agents)} LLM agents with current market focus: {list(self.llm_agents.keys())}")
     
+    async def _retry_with_backoff(self, api_call_func, max_retries=3, initial_delay=1):
+        """
+        Generic retry mechanism with exponential backoff for API calls.
+        """
+        delay = initial_delay
+        for i in range(max_retries):
+            try:
+                return await api_call_func()
+            except Exception as e:
+                if i == max_retries - 1:  # Last attempt
+                    raise e
+                self.logger.warning(f"API call failed (attempt {i+1}/{max_retries}): {e}. Retrying in {delay}s...")
+                await asyncio.sleep(delay)
+                delay *= 2  # Exponential backoff
+        
+        return None  # Should never reach here
+    
     async def consensus_analysis(self, query: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Get consensus analysis from multiple LLMs"""
+        """Get consensus analysis from multiple LLMs with robust fallback chain"""
         try:
             self.logger.info(f"Starting consensus analysis with {len(self.llm_agents)} agents - focusing on current market conditions")
             
+            # Try fallback chain approach first
+            fallback_result = await self._try_fallback_chain(query, context)
+            if fallback_result:
+                return fallback_result
+            
+            # If fallback chain fails, try traditional consensus
+            return await self._traditional_consensus_analysis(query, context)
+            
+        except Exception as e:
+            self.logger.error(f"Consensus analysis failed: {str(e)}")
+            return {
+                "error": str(e),
+                "consensus": None,
+                "individual_results": [],
+                "consensus_method": self.consensus_method.value,
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    async def _try_fallback_chain(self, query: str, context: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
+        """
+        Try analysis using the fallback chain - one model at a time until one succeeds.
+        """
+        for model_name in self.fallback_chain:
+            if model_name not in self.llm_agents:
+                continue
+                
+            try:
+                self.logger.info(f"Trying {model_name} in fallback chain...")
+                
+                # Use retry mechanism for each model
+                result = await self._retry_with_backoff(
+                    lambda: self.llm_agents[model_name].analyze(query, context),
+                    max_retries=3,
+                    initial_delay=1
+                )
+                
+                if result and result.confidence > 0:
+                    self.logger.info(f"✅ {model_name} succeeded in fallback chain")
+                    
+                    # Create consensus-like structure from single successful result
+                    consensus = {
+                        "analysis": f"Fallback Chain Analysis - {model_name} succeeded\n\n{result.analysis}",
+                        "consensus_insights": result.key_insights,
+                        "consensus_recommendations": result.recommendations,
+                        "confidence": result.confidence,
+                        "successful_model": model_name,
+                        "method": "fallback_chain",
+                        "market_focus": "current"
+                    }
+                    
+                    return {
+                        "consensus": consensus,
+                        "individual_results": [self._result_to_dict(result)],
+                        "failed_results": [],
+                        "consensus_method": "fallback_chain",
+                        "aggregate_metrics": {
+                            "total_cost": result.cost,
+                            "average_confidence": result.confidence,
+                            "total_execution_time": result.execution_time,
+                            "successful_analyses": 1,
+                            "failed_analyses": 0
+                        },
+                        "market_focus": "current",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    
+            except Exception as e:
+                self.logger.warning(f"❌ {model_name} failed in fallback chain: {str(e)}")
+                continue
+        
+        self.logger.warning("All models in fallback chain failed")
+        return None
+    
+    async def _traditional_consensus_analysis(self, query: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Traditional consensus analysis when fallback chain fails"""
+        try:
             # Execute all analyses in parallel
             tasks = [agent.analyze(query, context) for agent in self.llm_agents.values()]
             results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -845,7 +1059,7 @@ class MultiLLMOrchestrator:
             }
             
         except Exception as e:
-            self.logger.error(f"Consensus analysis failed: {str(e)}")
+            self.logger.error(f"Traditional consensus analysis failed: {str(e)}")
             return {
                 "error": str(e),
                 "consensus": None,
