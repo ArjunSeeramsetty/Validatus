@@ -43,10 +43,9 @@ class EnhancedValidatusOrchestrator:
             
             # Step 1: Multi-LLM Analysis
             self.logger.info("Step 1: Executing Multi-LLM analysis")
-            llm_analysis = await self.llm_orchestrator.analyze_with_consensus(
+            llm_analysis = await self.llm_orchestrator.consensus_analysis(
                 query=query,
-                context=context or {},
-                analysis_type=analysis_type
+                context=context or {}
             )
             
             # Step 2: Strategic Framework Analysis
@@ -94,10 +93,8 @@ class EnhancedValidatusOrchestrator:
             entities = self._extract_entities_from_analysis(strategic_analysis)
             
             # Query knowledge graph for additional insights
-            knowledge_insights = await self.knowledge_graph.analyze_entities(
-                entities=entities,
-                query=query,
-                context=context
+            knowledge_insights = await self.knowledge_graph.relationship_analysis(
+                entities=entities
             )
             
             return knowledge_insights

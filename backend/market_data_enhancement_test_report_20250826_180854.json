@@ -1,0 +1,134 @@
+{
+  "test_timestamp": "2025-08-26T18:08:54.678875",
+  "test_query": "Analyze the current market opportunities for electric vehicle adoption in emerging markets",
+  "test_context": {
+    "industry": "automotive",
+    "focus": "emerging_markets",
+    "technology": "electric_vehicles",
+    "timeframe": "current_market_conditions"
+  },
+  "overall_status": "FAIL",
+  "test_results": {
+    "OpenAI": {
+      "status": "success",
+      "validation": {
+        "valid": true,
+        "issues": [],
+        "score": 10
+      },
+      "result": "LLMAnalysisResult(model_name='OpenAI-gpt-4o', analysis='**1. Key Strategic Insights:**\\n\\n- **Growing Demand for EVs:** In the past 6-12 months, there has been a noticeable increase in demand for electric vehicles (EVs) in emerging markets, driven by heightened environmental awareness and government incentives. Countries like India, Brazil, and South Africa are witnessing a surge in consumer interest due to rising fuel prices and urban pollution concerns.\\n\\n- **Government Support and Policies:** Several emerging markets have introduced favorable policies to boost EV adoption. For instance, India has extended its FAME II scheme to provide subsidies for EV purchases, while Brazil has reduced import duties on EV components. These initiatives are crucial in reducing the cost barrier for consumers.\\n\\n- **Infrastructure Development:** There has been significant investment in charging infrastructure in emerging markets. Companies are partnering with local governments to expand charging networks, which is essential for alleviating range anxiety among potential EV buyers.\\n\\n**2. Market Implications:**\\n\\n- **Competitive Landscape:** The entry of new players, including local startups and international automakers, is intensifying competition. Companies like Tata Motors in India and BYD in Brazil are expanding their EV offerings, which is expected to drive innovation and reduce costs.\\n\\n- **Supply Chain Challenges:** Despite the positive momentum, supply chain constraints, particularly in battery production and raw material availability, pose challenges. Emerging markets are exploring local production of batteries to mitigate these risks.\\n\\n- **Consumer Education and Perception:** There is a growing need for consumer education regarding the benefits and practicalities of EV ownership. Misconceptions about range, cost, and maintenance need to be addressed to accelerate adoption.\\n\\n**3. Risk Assessment:**\\n\\n- **Economic Volatility:** Emerging markets are susceptible to economic fluctuations, which can impact consumer purchasing power and government funding for EV initiatives.\\n\\n- **Regulatory Uncertainty:** While current policies are favorable, any changes in government or policy direction could impact market dynamics. Continuous monitoring of regulatory environments is essential.\\n\\n- **Infrastructure Gaps:** Despite progress, infrastructure development is uneven across regions. Rural areas, in particular, may lag in charging infrastructure, limiting EV adoption outside urban centers.\\n\\n**4. Actionable Recommendations:**\\n\\n- **Strategic Partnerships:** Automakers should form alliances with local governments and tech companies to accelerate infrastructure development and enhance market penetration.\\n\\n- **Localization of Production:** Investing in local manufacturing and assembly plants can help mitigate supply chain risks and reduce costs, making EVs more affordable for consumers.\\n\\n- **Consumer Engagement Programs:** Launch educational campaigns to inform consumers about the benefits of EVs, addressing common misconceptions and highlighting long-term savings.\\n\\n- **Flexible Financing Options:** Develop financing solutions tailored to emerging markets, such as leasing models or battery-as-a-service, to lower the initial cost barrier for consumers.\\n\\n**5. Confidence Level: 0.85**\\n\\nThis analysis is based on recent data and trends observed in the last 6-12 months. While the information is current and relevant, the dynamic nature of emerging markets and potential for rapid change in economic and regulatory environments necessitate a slightly cautious confidence level. Continuous monitoring and adaptation to new developments will be crucial for sustained success in these markets.', confidence=1.0, key_insights=['**1. Key Strategic Insights:**', '- **Growing Demand for EVs:** In the past 6-12 months, there has been a noticeable increase in demand for electric vehicles (EVs) in emerging markets, driven by heightened environmental awareness and government incentives. Countries like India, Brazil, and South Africa are witnessing a surge in consumer interest due to rising fuel prices and urban pollution concerns.', '- **Government Support and Policies:** Several emerging markets have introduced favorable policies to boost EV adoption. For instance, India has extended its FAME II scheme to provide subsidies for EV purchases, while Brazil has reduced import duties on EV components. These initiatives are crucial in reducing the cost barrier for consumers.', '- **Infrastructure Development:** There has been significant investment in charging infrastructure in emerging markets. Companies are partnering with local governments to expand charging networks, which is essential for alleviating range anxiety among potential EV buyers.', '**2. Market Implications:**'], recommendations=['**4. Actionable Recommendations:**', '- **Strategic Partnerships:** Automakers should form alliances with local governments and tech companies to accelerate infrastructure development and enhance market penetration.'], execution_time=10.560188, cost=0.00457, timestamp=datetime.datetime(2025, 8, 26, 18, 7, 34, 21137), metadata={'tokens_used': 914, 'market_focus': 'current'})"
+    },
+    "Anthropic": {
+      "status": "success",
+      "validation": {
+        "valid": true,
+        "issues": [],
+        "score": 10
+      },
+      "result": "LLMAnalysisResult(model_name='Anthropic-claude-3-5-sonnet-20241022', analysis=\"STRATEGIC MARKET ANALYSIS: EV ADOPTION IN EMERGING MARKETS\\nAnalysis Date: 2025-08-26\\nConfidence Level: 0.85\\n\\n1. KEY STRATEGIC INSIGHTS\\n- Rapid urbanization in key emerging markets (India, Southeast Asia, Brazil) driving increased EV demand\\n- Battery costs decreased 35% in past 12 months, significantly improving TCO proposition\\n- Local manufacturing initiatives gaining traction, particularly in India and Indonesia\\n- Government incentives shifting from direct subsidies to infrastructure development\\n- Chinese manufacturers aggressively expanding into emerging markets with cost-competitive models\\n\\n2. MARKET IMPLICATIONS\\nRecent Developments:\\n- India's domestic EV production up 180% YoY\\n- Indonesia secured $15B in battery manufacturing investments\\n- Brazil launched Green Mobility 2025 initiative with tax incentives\\n- Southeast Asian charging infrastructure expanded 250% in last 6 months\\n\\nMarket Dynamics:\\n- Two-wheeler EV segment showing strongest growth (68% YoY)\\n- Commercial fleet electrification accelerating faster than personal vehicles\\n- Local brands gaining market share through price-competitive offerings\\n- Battery swapping networks becoming prevalent in dense urban areas\\n\\n3. RISK ASSESSMENT\\nPrimary Risks:\\n- Grid infrastructure limitations in tier 2/3 cities\\n- Raw material price volatility affecting battery costs\\n- Potential trade restrictions on Chinese imports\\n- Currency fluctuations impacting component costs\\n\\nSecondary Risks:\\n- Limited charging infrastructure in rural areas\\n- Consumer financing challenges\\n- Technical skill gap in maintenance sector\\n- Regional policy inconsistencies\\n\\n4. ACTIONABLE RECOMMENDATIONS\\nShort-term (3-6 months):\\n- Focus on urban fleet partnerships\\n- Develop battery swapping networks\\n- Launch entry-level EV models\\n- Establish local manufacturing partnerships\\n\\nMedium-term (6-12 months):\\n- Invest in dealer technical training programs\\n- Expand charging infrastructure to tier 2 cities\\n- Develop financing partnerships with local banks\\n- Create localized supply chains\\n\\n5. OPPORTUNITY ASSESSMENT\\nHigh-Potential Segments:\\n- Commercial delivery fleets\\n- Urban two-wheelers\\n- Ride-sharing platforms\\n- Public transportation\\n\\nGrowth Markets (Ranked):\\n1. India\\n2. Indonesia\\n3. Brazil\\n4. Vietnam\\n5. Thailand\\n\\n6. DATA CONFIDENCE FACTORS (0-1)\\n- Market Data Recency: 0.9\\n- Economic Indicators: 0.85\\n- Policy Framework: 0.8\\n- Competitive Intelligence: 0.85\\nOverall Confidence: 0.85\\n\\n7. CRITICAL SUCCESS FACTORS\\n- Local manufacturing presence\\n- Price competitiveness\\n- Robust after-sales network\\n- Government relationship management\\n- Charging infrastructure partnerships\\n\\nThis analysis prioritizes recent market developments and current conditions, focusing on actionable insights for immediate market entry or expansion strategies. The relatively high confidence level (0.85) reflects strong recent data availability and clear market trends, though some uncertainty exists regarding policy evolution and infrastructure development pace.\\n\\nNote: This analysis is based on market conditions as of August 2025 and should be reviewed regularly due to the dynamic nature of emerging markets and EV technology.\", confidence=1.0, key_insights=['1. KEY STRATEGIC INSIGHTS', '- Rapid urbanization in key emerging markets (India, Southeast Asia, Brazil) driving increased EV demand', '- Battery costs decreased 35% in past 12 months, significantly improving TCO proposition', '- Local manufacturing initiatives gaining traction, particularly in India and Indonesia', '- Government incentives shifting from direct subsidies to infrastructure development'], recommendations=['- Local manufacturing initiatives gaining traction, particularly in India and Indonesia', '4. ACTIONABLE RECOMMENDATIONS', 'This analysis prioritizes recent market developments and current conditions, focusing on actionable insights for immediate market entry or expansion strategies. The relatively high confidence level (0.85) reflects strong recent data availability and clear market trends, though some uncertainty exists regarding policy evolution and infrastructure development pace.', 'Note: This analysis is based on market conditions as of August 2025 and should be reviewed regularly due to the dynamic nature of emerging markets and EV technology.'], execution_time=17.964409, cost=0.0030540000000000003, timestamp=datetime.datetime(2025, 8, 26, 18, 7, 52, 340416), metadata={'input_tokens': 311, 'output_tokens': 707, 'market_focus': 'current'})"
+    },
+    "Perplexity": {
+      "status": "success",
+      "validation": {
+        "valid": true,
+        "issues": [],
+        "score": 10
+      },
+      "result": "LLMAnalysisResult(model_name='Perplexity-sonar-pro', analysis='**Electric vehicle (EV) adoption in emerging markets is accelerating, with several countries now outpacing developed economies in growth rates and market share, driven by policy support, Chinese investment, and rising consumer demand[1][2].**\\n\\n---\\n\\n### 1. Key Strategic Insights\\n\\n- **Rapid Growth in Emerging Markets:** Countries such as Vietnam, Thailand, and Brazil have seen EV sales rise dramatically in the past two years, in some cases achieving higher adoption rates than wealthier nations[2].\\n- **Chinese Influence:** Chinese automakers and battery suppliers are playing a pivotal role, both through exports and direct investment in local manufacturing and supply chains[1].\\n- **Policy Experimentation:** Emerging markets are actively deploying a mix of incentives, industrial policies, and infrastructure investments to catalyze EV adoption and local industry development[1].\\n- **Manufacturing Expansion:** Local and foreign investment in EV and battery manufacturing is increasing, signaling a shift from import dependence to regional production hubs[1].\\n\\n---\\n\\n### 2. Market Implications\\n\\n- **Outperformance vs. Developed Markets:** While some developed markets (notably the US and parts of Europe) have seen EV sales slow or plateau in 2024\u20132025, emerging markets are defying expectations with sustained double-digit growth[1][2].\\n- **Infrastructure and Value Chain Development:** The rise in EV adoption is matched by rapid expansion of charging infrastructure and battery value chains, often supported by government and private sector collaboration[1].\\n- **Policy-Driven Momentum:** Many emerging markets are leveraging policy tools\u2014such as tax breaks, import duty reductions, and local content requirements\u2014to accelerate the transition and capture more value domestically[1][3].\\n- **Global Market Impact:** The increasing share of EVs in emerging markets is shifting the center of gravity for global automotive growth, with implications for oil demand, emissions, and competitive dynamics[3].\\n\\n---\\n\\n### 3. Risk Assessment\\n\\n- **Economic Volatility:** Currency fluctuations, inflation, and uneven economic recovery post-pandemic pose risks to consumer affordability and investment flows.\\n- **Policy Uncertainty:** Shifts in government priorities or political instability could disrupt incentive programs or regulatory frameworks.\\n- **Supply Chain Vulnerabilities:** Heavy reliance on Chinese technology and components exposes markets to geopolitical and trade risks[1].\\n- **Infrastructure Gaps:** Despite progress, inadequate charging networks and grid reliability remain barriers in many regions.\\n- **Affordability and Financing:** High upfront costs and limited access to consumer financing constrain mass-market adoption, especially outside urban centers.\\n\\n---\\n\\n### 4. Actionable Recommendations\\n\\n- **Localize Production:** Invest in or partner with local manufacturing and assembly to reduce costs, mitigate supply chain risks, and comply with local content rules.\\n- **Leverage Chinese Partnerships:** Collaborate with leading Chinese OEMs and battery suppliers to access cost-competitive technology and accelerate time-to-market.\\n- **Target Urban Fleets:** Focus on fleet electrification (taxis, ride-hailing, delivery) in major cities, where TCO (total cost of ownership) advantages and infrastructure density are greatest.\\n- **Support Policy Engagement:** Engage proactively with policymakers to shape incentives, standards, and infrastructure planning, ensuring alignment with business objectives.\\n- **Innovate Financing:** Develop creative financing and leasing models to lower barriers for first-time buyers and small businesses.\\n- **Invest in Charging Networks:** Partner with utilities and tech firms to expand fast-charging infrastructure and integrate renewable energy solutions.\\n\\n---\\n\\n### 5. Confidence Level\\n\\n**Confidence Level: 0.9**\\n\\n- **Rationale:** Analysis is grounded in multiple recent (2025) authoritative sources[1][2][3], with consistent trends across regions. Some uncertainty remains due to economic and policy volatility, but the direction of market momentum is clear and well-supported.\\n\\n---\\n\\n**Summary:**  \\nEmerging markets are now among the fastest-growing regions for EV adoption, driven by policy innovation, Chinese investment, and rising consumer demand. Strategic opportunities exist in local manufacturing, urban fleet electrification, and infrastructure development, but risks from economic volatility and supply chain dependencies require careful management[1][2][3].', confidence=0.9, key_insights=['**Electric vehicle (EV) adoption in emerging markets is accelerating, with several countries now outpacing developed economies in growth rates and market share, driven by policy support, Chinese investment, and rising consumer demand[1][2].**', '---', '### 1. Key Strategic Insights', '- **Rapid Growth in Emerging Markets:** Countries such as Vietnam, Thailand, and Brazil have seen EV sales rise dramatically in the past two years, in some cases achieving higher adoption rates than wealthier nations[2].', '- **Chinese Influence:** Chinese automakers and battery suppliers are playing a pivotal role, both through exports and direct investment in local manufacturing and supply chains[1].'], recommendations=['### 4. Actionable Recommendations'], execution_time=27.917507, cost=0.0001186, timestamp=datetime.datetime(2025, 8, 26, 18, 8, 20, 257923), metadata={'word_count': 593, 'market_focus': 'current'})"
+    },
+    "Google Gemini": {
+      "status": "failed",
+      "validation": {
+        "valid": false,
+        "issues": [
+          "Missing market_focus in metadata",
+          "Analysis doesn't appear to focus on current market conditions"
+        ],
+        "score": 8
+      },
+      "result": "LLMAnalysisResult(model_name='Google-gemini-2.5-pro', analysis='Analysis failed: 500 An internal error has occurred. Please retry or report in https://developers.generativeai.google/guide/troubleshooting', confidence=0.0, key_insights=[], recommendations=[], execution_time=1.572736, cost=0.0, timestamp=datetime.datetime(2025, 8, 26, 18, 8, 21, 831707), metadata={'error': '500 An internal error has occurred. Please retry or report in https://developers.generativeai.google/guide/troubleshooting'})"
+    },
+    "MultiLLM_Orchestrator": {
+      "status": "failed",
+      "validation": {
+        "valid": false,
+        "issues": [
+          "Missing market_focus in consensus result"
+        ],
+        "score": 9
+      },
+      "capabilities": {
+        "consensus_methods": [
+          "majority_vote",
+          "weighted_average",
+          "confidence_based",
+          "expert_validation",
+          "clustering_based"
+        ],
+        "current_method": "confidence_based",
+        "available_models": [
+          "openai_gpt4",
+          "anthropic_claude",
+          "google_gemini",
+          "perplexity_sonar"
+        ],
+        "total_models": 4,
+        "features": [
+          "multi_llm_consensus",
+          "confidence_based_scoring",
+          "parallel_analysis",
+          "fallback_consensus",
+          "health_monitoring",
+          "current_market_focus",
+          "data_recency_prioritization"
+        ],
+        "supported_analysis_types": [
+          "strategic",
+          "market",
+          "competitive",
+          "financial"
+        ],
+        "market_focus": "current",
+        "timestamp": "2025-08-26T18:08:22.537716"
+      },
+      "consensus_result": {
+        "error": "'MultiLLMOrchestrator' object has no attribute '_result_to_dict'",
+        "consensus": null,
+        "individual_results": [],
+        "consensus_method": "confidence_based",
+        "timestamp": "2025-08-26T18:08:39.052893"
+      }
+    },
+    "System_Integration": {
+      "status": "failed",
+      "validation": {
+        "valid": false,
+        "issues": [
+          "Missing market_focus in consensus result"
+        ],
+        "score": 9
+      },
+      "query": "What are the current strategic implications of AI regulation in the financial services sector?",
+      "context": {
+        "sector": "financial_services",
+        "technology": "artificial_intelligence",
+        "focus": "regulatory_impact",
+        "timeframe": "current_conditions"
+      },
+      "consensus_result": {
+        "error": "'MultiLLMOrchestrator' object has no attribute '_majority_vote_consensus'",
+        "consensus": null,
+        "individual_results": [],
+        "consensus_method": "majority_vote",
+        "timestamp": "2025-08-26T18:08:54.678875"
+      }
+    }
+  },
+  "summary": {
+    "total_tests": 6,
+    "successful_tests": 3,
+    "failed_tests": 3,
+    "error_tests": 0,
+    "success_rate": "50.0%"
+  }
+}

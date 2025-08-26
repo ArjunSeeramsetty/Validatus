@@ -8,6 +8,7 @@ from typing import Dict
 from app.core.workflow import ValidatusWorkflow
 from app.core.state import ValidatusState, AnalysisStatus
 from app.core.models import AnalysisRequest, AnalysisResponse
+from app.api.strategic_analysis import router as strategic_analysis_router
 from config import settings
 
 app = FastAPI(title="Validatus Platform API", version="1.0.0")
@@ -19,6 +20,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include strategic analysis endpoints
+app.include_router(strategic_analysis_router, prefix="/api")
 
 # In a production environment, this would be a persistent store like Redis or a database.
 analysis_store: Dict = {}

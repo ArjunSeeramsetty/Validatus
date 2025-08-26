@@ -1,6 +1,6 @@
 import asyncio
 from typing import Any, Dict, List
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 import openai
 from datetime import datetime
@@ -17,7 +17,12 @@ from ..scoring.aggregators import ScoreAggregator
 from ..utils.nlp import QueryParser
 from config import settings
 
+from .multi_llm_orchestrator import MultiLLMOrchestrator, ConsensusMethod
+from .knowledge_graph_analyzer import KnowledgeGraphAnalyzer
+
 class ValidatusWorkflow:
+    """Main workflow orchestrator for the Validatus platform"""
+    
     def __init__(self):
         self.agents = {
             'market_research': MarketResearchAgent(),
@@ -30,6 +35,10 @@ class ValidatusWorkflow:
         self.query_parser = QueryParser()
         self.scoring_engine = LayerScoringEngine()
         self.aggregator = ScoreAggregator()
+        
+        # Initialize new components
+        self.multi_llm_orchestrator = MultiLLMOrchestrator(ConsensusMethod.CONFIDENCE_BASED)
+        self.knowledge_graph_analyzer = KnowledgeGraphAnalyzer()
         
     def build_workflow(self):
         """Build and return the complete Validatus workflow"""
@@ -44,8 +53,7 @@ class ValidatusWorkflow:
         workflow.add_node("generate_insights", self.generate_insights)
         workflow.add_node("create_dashboard", self.create_dashboard)
         
-        # Add edges
-        workflow.add_edge(START, "parse_query")
+        # Add edges - in newer LangGraph versions, we start with the first node
         workflow.add_edge("parse_query", "plan_research")
         workflow.add_edge("plan_research", "execute_research")
         workflow.add_edge("execute_research", "score_layers")
@@ -53,6 +61,9 @@ class ValidatusWorkflow:
         workflow.add_edge("aggregate_scores", "generate_insights")
         workflow.add_edge("generate_insights", "create_dashboard")
         workflow.add_edge("create_dashboard", END)
+        
+        # Set the entry point
+        workflow.set_entry_point("parse_query")
         
         memory = MemorySaver()
         return workflow.compile(checkpointer=memory)
@@ -326,3 +337,82 @@ class ValidatusWorkflow:
         Format the recommendations as a bulleted list starting with '- '.
         """
         return prompt
+
+    async def enhanced_analysis(self, query: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Enhanced analysis using Multi-LLM consensus and Knowledge Graph insights"""
+        try:
+            # Get consensus analysis from multiple LLMs
+            llm_consensus = await self.multi_llm_orchestrator.consensus_analysis(query, context)
+            
+            # Extract entities for knowledge graph analysis
+            entities = self._extract_entities_from_consensus(llm_consensus)
+            
+            # Get knowledge graph insights
+            kg_insights = await self.knowledge_graph_analyzer.relationship_analysis(entities, depth=2)
+            
+            # Combine insights
+            combined_analysis = {
+                "llm_consensus": llm_consensus,
+                "knowledge_graph_insights": kg_insights,
+                "enhanced_recommendations": self._combine_recommendations(llm_consensus, kg_insights),
+                "analysis_timestamp": datetime.now().isoformat()
+            }
+            
+            return combined_analysis
+            
+        except Exception as e:
+            # self.logger.error(f"Enhanced analysis failed: {str(e)}") # Original code had this line commented out
+            return {"error": str(e)}
+    
+    def _extract_entities_from_consensus(self, consensus: Dict[str, Any]) -> List[str]:
+        """Extract entity names from LLM consensus for knowledge graph analysis"""
+        entities = []
+        
+        try:
+            # Extract from consensus insights
+            if "consensus" in consensus and "consensus_insights" in consensus["consensus"]:
+                for insight in consensus["consensus"]["consensus_insights"]:
+                    # Simple entity extraction (in production, use NER)
+                    words = insight.split()
+                    for word in words:
+                        if word[0].isupper() and len(word) > 2:
+                            entities.append(word)
+            
+            # Extract from individual results
+            if "individual_results" in consensus:
+                for result in consensus["individual_results"]:
+                    if "key_insights" in result:
+                        for insight in result["key_insights"]:
+                            words = insight.split()
+                            for word in words:
+                                if word[0].isupper() and len(word) > 2:
+                                    entities.append(word)
+            
+            # Remove duplicates and limit
+            unique_entities = list(set(entities))[:10]
+            return unique_entities
+            
+        except Exception as e:
+            # self.logger.error(f"Entity extraction failed: {str(e)}") # Original code had this line commented out
+            return []
+    
+    def _combine_recommendations(self, llm_consensus: Dict[str, Any], kg_insights: Dict[str, Any]) -> List[str]:
+        """Combine recommendations from LLM consensus and knowledge graph insights"""
+        combined_recommendations = []
+        
+        try:
+            # Add LLM recommendations
+            if "consensus" in llm_consensus and "consensus_recommendations" in llm_consensus["consensus"]:
+                combined_recommendations.extend(llm_consensus["consensus"]["consensus_recommendations"])
+            
+            # Add knowledge graph recommendations
+            if "opportunities_risks" in kg_insights and "recommendations" in kg_insights["opportunities_risks"]:
+                combined_recommendations.extend(kg_insights["opportunities_risks"]["recommendations"])
+            
+            # Remove duplicates and limit
+            unique_recommendations = list(set(combined_recommendations))[:10]
+            return unique_recommendations
+            
+        except Exception as e:
+            # self.logger.error(f"Recommendation combination failed: {str(e)}") # Original code had this line commented out
+            return []
