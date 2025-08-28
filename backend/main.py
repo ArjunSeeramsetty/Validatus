@@ -5,11 +5,9 @@ import uuid
 from datetime import datetime
 from typing import Dict
 
-from app.core.workflow import ValidatusWorkflow
-from app.core.state import ValidatusState, AnalysisStatus
+from app.core.comprehensive_langgraph_workflow_fixed import ContextAwareLangGraphWorkflow
+from app.core.simple_state import State as ValidatusState
 from app.core.models import AnalysisRequest, AnalysisResponse
-from app.api.strategic_analysis import router as strategic_analysis_router
-from config import settings
 
 app = FastAPI(title="Validatus Platform API", version="1.0.0")
 
@@ -21,32 +19,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include strategic analysis endpoints
-app.include_router(strategic_analysis_router, prefix="/api")
+# API endpoints are defined directly in this file
 
 # In a production environment, this would be a persistent store like Redis or a database.
 analysis_store: Dict = {}
 
 # Initialize the workflow once
-validatus_workflow = ValidatusWorkflow()
-compiled_workflow = validatus_workflow.build_workflow()
+validatus_workflow = ContextAwareLangGraphWorkflow()
 
 async def run_analysis(analysis_id: str):
     """Run the complete analysis workflow."""
     try:
-        config = {"configurable": {"thread_id": analysis_id}}
         initial_state = analysis_store[analysis_id]
         
-        async for event in compiled_workflow.astream(initial_state, config=config):
-            # The state is automatically persisted by the checkpointer.
-            # We can update our in-memory store for status checks.
-            if event:
-                last_state_key = list(event.keys())[-1]
-                analysis_store[analysis_id] = event[last_state_key]
+        # Execute the workflow using the current workflow instance
+        result = await validatus_workflow.execute(
+            idea_description=initial_state.idea_description,
+            target_audience=initial_state.target_audience,
+            additional_context=initial_state.additional_context
+        )
+        
+        # Update the store with results
+        analysis_store[analysis_id] = result
 
     except Exception as e:
         if analysis_id in analysis_store:
-            analysis_store[analysis_id]["status"] = AnalysisStatus.FAILED
+            analysis_store[analysis_id]["status"] = "FAILED"
             analysis_store[analysis_id]["errors"] = analysis_store[analysis_id].get("errors", []) + [f"Workflow execution error: {str(e)}"]
 
 @app.post("/api/v1/analysis", response_model=AnalysisResponse)
@@ -55,21 +53,9 @@ async def create_analysis(request: AnalysisRequest, background_tasks: Background
     analysis_id = str(uuid.uuid4())
     
     initial_state = ValidatusState(
-        user_query=request.query,
-        analysis_context=request.context.dict(),
-        analysis_id=analysis_id,
-        query_interpretation={},
-        research_tasks=[],
-        research_results={},
-        layer_scores={},
-        factor_scores={},
-        segment_scores={},
-        dashboard_data={},
-        recommendations=[],
-        status=AnalysisStatus.INITIATED,
-        progress=0,
-        errors=[],
-        timestamp=datetime.utcnow().isoformat()
+        idea_description=request.query,
+        target_audience=request.context.get("target_audience", "General audience"),
+        additional_context=request.context.dict()
     )
     
     analysis_store[analysis_id] = initial_state
@@ -78,7 +64,7 @@ async def create_analysis(request: AnalysisRequest, background_tasks: Background
     
     return AnalysisResponse(
         analysis_id=analysis_id,
-        status=AnalysisStatus.INITIATED,
+        status="INITIATED",
         progress=0,
     )
 
@@ -91,8 +77,8 @@ async def get_analysis_status(analysis_id: str):
     
     return AnalysisResponse(
         analysis_id=analysis_id,
-        status=state["status"],
-        progress=state["progress"],
+        status=state.get("status", "UNKNOWN"),
+        progress=state.get("progress", 0),
     )
 
 @app.get("/api/v1/analysis/{analysis_id}/results")
@@ -102,10 +88,10 @@ async def get_analysis_results(analysis_id: str):
     if not state:
         raise HTTPException(status_code=404, detail="Analysis not found")
     
-    if state["status"] != AnalysisStatus.COMPLETED:
-        raise HTTPException(status_code=400, detail=f"Analysis not completed. Current status: {state['status']}")
+    if state.get("status") != "COMPLETED":
+        raise HTTPException(status_code=400, detail=f"Analysis not completed. Current status: {state.get('status', 'UNKNOWN')}")
     
-    return state["dashboard_data"]
+    return state.get("dashboard_data", {})
 
 @app.get("/health")
 async def health_check():

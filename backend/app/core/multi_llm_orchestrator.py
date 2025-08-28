@@ -36,7 +36,7 @@ class LLMAnalysisResult:
 class OpenAIAgent:
     """OpenAI GPT-4 agent for strategic analysis with current market focus"""
     
-    def __init__(self, model: str = 'gpt-4o'):
+    def __init__(self, model: str = 'gpt-4o-mini'):
         self.model = model
         self.client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self.logger = logging.getLogger(f"llm.openai.{model}")
@@ -560,7 +560,7 @@ class PerplexityAgent:
 class GoogleGeminiAgent:
     """Google Gemini agent for strategic analysis"""
     
-    def __init__(self, model: str = 'gemini-2.5-pro'):
+    def __init__(self, model: str = 'gemini-2.5-flash-lite'):
         self.model = model
         # Don't configure API key here - do it just before the API call
         self.model_instance = None
@@ -879,38 +879,42 @@ class MultiLLMOrchestrator:
         self.llm_agents = {}
         self._initialize_agents()
         
-        # Fallback chain priority (order matters)
-        self.fallback_chain = ['google_gemini', 'perplexity_sonar', 'anthropic_claude', 'openai_gpt4']
+        # Fallback chain priority (order matters) - User specified priority
+        self.fallback_chain = ['google_gemini', 'perplexity_sonar', 'openai_gpt4', 'anthropic_claude']
     
     def _initialize_agents(self):
-        """Initialize available LLM agents based on API keys"""
-        try:
-            if hasattr(settings, 'OPENAI_API_KEY') and settings.OPENAI_API_KEY:
-                self.llm_agents['openai_gpt4'] = OpenAIAgent(model='gpt-4o')
-                self.logger.info("OpenAI GPT-4 agent initialized with current market focus")
-        except Exception as e:
-            self.logger.warning(f"OpenAI agent initialization failed: {e}")
-        
-        try:
-            if hasattr(settings, 'ANTHROPIC_API_KEY') and settings.ANTHROPIC_API_KEY:
-                self.llm_agents['anthropic_claude'] = AnthropicAgent(model='claude-3-5-sonnet-20241022')
-                self.logger.info("Anthropic Claude agent initialized with current market focus")
-        except Exception as e:
-            self.logger.warning(f"Anthropic agent initialization failed: {e}")
-        
+        """Initialize available LLM agents based on API keys - User specified priority order"""
+        # Priority 1: Google Gemini
         try:
             if hasattr(settings, 'GOOGLE_GEMINI_API_KEY') and settings.GOOGLE_GEMINI_API_KEY:
-                self.llm_agents['google_gemini'] = GoogleGeminiAgent(model='gemini-2.5-pro')
-                self.logger.info("Google Gemini agent initialized with current market focus")
+                self.llm_agents['google_gemini'] = GoogleGeminiAgent(model='gemini-2.5-flash-lite')
+                self.logger.info("✅ Google Gemini agent initialized (Priority 1)")
         except Exception as e:
-            self.logger.warning(f"Google Gemini agent initialization failed: {e}")
+            self.logger.warning(f"❌ Google Gemini agent initialization failed: {e}")
         
+        # Priority 2: Perplexity Sonar
         try:
             if hasattr(settings, 'PERPLEXITY_API_KEY') and settings.PERPLEXITY_API_KEY:
                 self.llm_agents['perplexity_sonar'] = PerplexityAgent(model='sonar-pro')
-                self.logger.info("Perplexity Sonar agent initialized with current market focus")
+                self.logger.info("✅ Perplexity Sonar agent initialized (Priority 2)")
         except Exception as e:
-            self.logger.warning(f"Perplexity agent initialization failed: {e}")
+            self.logger.warning(f"❌ Perplexity Sonar agent initialization failed: {e}")
+        
+        # Priority 3: OpenAI GPT-4
+        try:
+            if hasattr(settings, 'OPENAI_API_KEY') and settings.OPENAI_API_KEY:
+                self.llm_agents['openai_gpt4'] = OpenAIAgent(model='gpt-4o-mini')
+                self.logger.info("✅ OpenAI GPT-4 agent initialized (Priority 3)")
+        except Exception as e:
+            self.logger.warning(f"❌ OpenAI agent initialization failed: {e}")
+        
+        # Priority 4: Anthropic Claude
+        try:
+            if hasattr(settings, 'ANTHROPIC_API_KEY') and settings.ANTHROPIC_API_KEY:
+                self.llm_agents['anthropic_claude'] = AnthropicAgent(model='claude-3-5-sonnet-20241022')
+                self.logger.info("✅ Anthropic Claude agent initialized (Priority 4)")
+        except Exception as e:
+            self.logger.warning(f"❌ Anthropic agent initialization failed: {e}")
         
         if not self.llm_agents:
             self.logger.error("No LLM agents could be initialized!")
@@ -921,15 +925,25 @@ class MultiLLMOrchestrator:
     async def _retry_with_backoff(self, api_call_func, max_retries=3, initial_delay=1):
         """
         Generic retry mechanism with exponential backoff for API calls.
+        Handles rate limits more intelligently.
         """
         delay = initial_delay
         for i in range(max_retries):
             try:
                 return await api_call_func()
             except Exception as e:
+                error_msg = str(e)
+                
+                # If it's a rate limit, don't retry immediately
+                if "429" in error_msg or "rate limit" in error_msg.lower() or "quota" in error_msg.lower():
+                    if i == max_retries - 1:  # Last attempt
+                        raise e
+                    self.logger.warning(f"⏳ Rate limit hit (attempt {i+1}/{max_retries}), moving to next priority...")
+                    raise e  # Don't retry, let fallback chain handle it
+                
                 if i == max_retries - 1:  # Last attempt
                     raise e
-                self.logger.warning(f"API call failed (attempt {i+1}/{max_retries}): {e}. Retrying in {delay}s...")
+                self.logger.warning(f"🔄 API call failed (attempt {i+1}/{max_retries}): {e}. Retrying in {delay}s...")
                 await asyncio.sleep(delay)
                 delay *= 2  # Exponential backoff
         
@@ -938,18 +952,23 @@ class MultiLLMOrchestrator:
     async def consensus_analysis(self, query: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Get consensus analysis from multiple LLMs with robust fallback chain"""
         try:
-            self.logger.info(f"Starting consensus analysis with {len(self.llm_agents)} agents - focusing on current market conditions")
+            self.logger.info(f"🚀 Starting consensus analysis with {len(self.llm_agents)} agents")
+            self.logger.info(f"📋 Available agents: {list(self.llm_agents.keys())}")
+            self.logger.info(f"🎯 Fallback priority: {' → '.join(self.fallback_chain)}")
             
             # Try fallback chain approach first
+            self.logger.info("🔄 Attempting fallback chain analysis...")
             fallback_result = await self._try_fallback_chain(query, context)
             if fallback_result:
+                self.logger.info(f"✅ Fallback chain succeeded using {fallback_result.get('consensus', {}).get('successful_model', 'unknown')}")
                 return fallback_result
             
             # If fallback chain fails, try traditional consensus
+            self.logger.info("🔄 Fallback chain failed, attempting traditional consensus...")
             return await self._traditional_consensus_analysis(query, context)
             
         except Exception as e:
-            self.logger.error(f"Consensus analysis failed: {str(e)}")
+            self.logger.error(f"💥 Consensus analysis failed: {str(e)}")
             return {
                 "error": str(e),
                 "consensus": None,
@@ -961,23 +980,27 @@ class MultiLLMOrchestrator:
     async def _try_fallback_chain(self, query: str, context: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
         """
         Try analysis using the fallback chain - one model at a time until one succeeds.
+        Follows user-specified priority: Gemini → Perplexity → OpenAI → Anthropic
         """
-        for model_name in self.fallback_chain:
+        self.logger.info(f"🚀 Starting fallback chain with priority: {' → '.join(self.fallback_chain)}")
+        
+        for i, model_name in enumerate(self.fallback_chain, 1):
             if model_name not in self.llm_agents:
+                self.logger.warning(f"⚠️ {model_name} not available, skipping...")
                 continue
                 
             try:
-                self.logger.info(f"Trying {model_name} in fallback chain...")
+                self.logger.info(f"🎯 Trying {model_name} (Priority {i}/{len(self.fallback_chain)})...")
                 
                 # Use retry mechanism for each model
                 result = await self._retry_with_backoff(
                     lambda: self.llm_agents[model_name].analyze(query, context),
-                    max_retries=3,
-                    initial_delay=1
+                    max_retries=2,  # Reduced retries for faster fallback
+                    initial_delay=0.5  # Faster initial delay
                 )
                 
                 if result and result.confidence > 0:
-                    self.logger.info(f"✅ {model_name} succeeded in fallback chain")
+                    self.logger.info(f"✅ {model_name} succeeded in fallback chain!")
                     
                     # Create consensus-like structure from single successful result
                     consensus = {
@@ -987,6 +1010,7 @@ class MultiLLMOrchestrator:
                         "confidence": result.confidence,
                         "successful_model": model_name,
                         "method": "fallback_chain",
+                        "priority_used": i,
                         "market_focus": "current"
                     }
                     
@@ -1000,17 +1024,22 @@ class MultiLLMOrchestrator:
                             "average_confidence": result.confidence,
                             "total_execution_time": result.execution_time,
                             "successful_analyses": 1,
-                            "failed_analyses": 0
+                            "failed_analyses": 0,
+                            "priority_used": i
                         },
                         "market_focus": "current",
                         "timestamp": datetime.now().isoformat()
                     }
                     
             except Exception as e:
-                self.logger.warning(f"❌ {model_name} failed in fallback chain: {str(e)}")
+                error_msg = str(e)
+                if "429" in error_msg or "rate limit" in error_msg.lower() or "quota" in error_msg.lower():
+                    self.logger.warning(f"⏳ {model_name} hit rate limit/quota, moving to next priority...")
+                else:
+                    self.logger.warning(f"❌ {model_name} failed: {error_msg}")
                 continue
         
-        self.logger.warning("All models in fallback chain failed")
+        self.logger.error("💥 All models in fallback chain failed")
         return None
     
     async def _traditional_consensus_analysis(self, query: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
