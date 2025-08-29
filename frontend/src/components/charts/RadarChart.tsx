@@ -1,41 +1,43 @@
 import React from 'react';
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts';
+import { RadarChart as RechartsRadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
 
-interface RadarChartProps {
+interface Props {
   data: Array<{
-    segment: string;
+    name: string;
     score: number;
-    confidence: number;
+    confidence?: number;
   }>;
-  title: string;
+  width?: number;
+  height?: number;
+  className?: string;
 }
 
-export const RadarChartComponent: React.FC<RadarChartProps> = ({ data, title }) => {
-  const chartData = data.map(item => ({
-    subject: item.segment,
-    A: item.score,
-    fullMark: 100,
-  }));
-
+export const RadarChart: React.FC<Props> = ({ data, width = 400, height = 400, className = '' }) => {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-      <ResponsiveContainer width="100%" height={400}>
-        <RadarChart data={chartData}>
-          <PolarGrid />
-          <PolarAngleAxis dataKey="subject" />
-          <PolarRadiusAxis angle={90} domain={[0, 100]} />
+    <div className={className} style={{ width, height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsRadarChart data={data}>
+          <PolarGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.3)" />
+          <PolarAngleAxis 
+            dataKey="name" 
+            tick={{ fontSize: 12, fill: 'currentColor' }}
+            className="text-white"
+          />
+          <PolarRadiusAxis 
+            angle={90} 
+            domain={[0, 100]} 
+            tick={{ fontSize: 10, fill: 'currentColor' }}
+            tickCount={6}
+          />
           <Radar
             name="Score"
-            dataKey="A"
-            stroke="#3B82F6"
-            fill="#3B82F6"
-            fillOpacity={0.3}
+            dataKey="score"
+            stroke="rgba(255,255,255,0.8)"
+            fill="rgba(255,255,255,0.2)"
+            strokeWidth={2}
+            dot={{ r: 4, fill: 'white' }}
           />
-          <Tooltip 
-            formatter={(value: number) => [`${value.toFixed(1)}%`, 'Score']}
-          />
-        </RadarChart>
+        </RechartsRadarChart>
       </ResponsiveContainer>
     </div>
   );

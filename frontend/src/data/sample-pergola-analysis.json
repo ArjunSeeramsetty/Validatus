@@ -1,0 +1,322 @@
+{
+  "query": "Strategic analysis for premium outdoor pergola business targeting homeowners in North America",
+  "overall_score": 78.5,
+  "overall_confidence": 0.85,
+  "segments": {
+    "CONSUMER": {
+      "score": 82.3,
+      "confidence": 0.88,
+      "trend": "up",
+      "priority": "high",
+      "key_insights": [
+        "Strong demand from affluent homeowners aged 35-60",
+        "Growing interest in outdoor living spaces post-pandemic",
+        "High willingness to pay for premium quality products"
+      ],
+      "recommendations": [
+        "Focus on premium positioning strategy",
+        "Develop targeted marketing for high-income demographics",
+        "Emphasize lifestyle benefits and outdoor entertainment"
+      ],
+      "factors": {
+        "Consumer_Demand_Need": {
+          "score": 85.2,
+          "confidence": 0.90,
+          "summary": "Strong market demand for premium outdoor structures with high willingness to pay",
+          "key_insights": [
+            "Market research shows 78% of target demographic interested in pergolas",
+            "Average budget range $15,000-$35,000 for premium installations"
+          ],
+          "recommendations": [
+            "Position as premium lifestyle enhancement",
+            "Target marketing to high-income homeowners"
+          ],
+          "layers": {
+            "need_perception": {
+              "score": 87.5,
+              "confidence": 0.92,
+              "calculation_method": "market_survey_analysis",
+              "supporting_data": {
+                "survey_respondents": 1250,
+                "interest_rate": 0.78,
+                "budget_range": "15000-35000"
+              },
+              "data_sources": [
+                "https://outdoor-living-market-research-2025.com",
+                "https://homeowner-survey-data.org"
+              ],
+              "summary": "High perceived need for premium outdoor structures among target demographic"
+            },
+            "purchase_intent": {
+              "score": 83.1,
+              "confidence": 0.89,
+              "calculation_method": "intent_survey_analysis",
+              "supporting_data": {
+                "intent_score": 8.3,
+                "timeline_6months": 0.65,
+                "timeline_12months": 0.82
+              },
+              "data_sources": [
+                "https://purchase-intent-research.com",
+                "https://consumer-behavior-analysis.org"
+              ],
+              "summary": "Strong purchase intent with 65% planning to buy within 6 months"
+            }
+          }
+        },
+        "Consumer_Behavior_Habits": {
+          "score": 79.8,
+          "confidence": 0.86,
+          "summary": "Target demographic shows preference for premium brands and quality over price",
+          "key_insights": [
+            "High brand loyalty among premium segment",
+            "Extensive research before purchase decisions"
+          ],
+          "recommendations": [
+            "Build strong brand reputation",
+            "Provide comprehensive product information"
+          ],
+          "layers": {
+            "shopping_habits": {
+              "score": 81.2,
+              "confidence": 0.87,
+              "calculation_method": "behavioral_analysis",
+              "supporting_data": {
+                "research_time": "4.2_weeks",
+                "online_research": 0.89,
+                "showroom_visits": 0.76
+              },
+              "data_sources": [
+                "https://shopping-behavior-research.com",
+                "https://consumer-habits-analysis.org"
+              ],
+              "summary": "Extensive research behavior with 89% conducting online research"
+            }
+          }
+        }
+      }
+    },
+    "MARKET": {
+      "score": 76.8,
+      "confidence": 0.84,
+      "trend": "up",
+      "priority": "high",
+      "key_insights": [
+        "Growing outdoor living market with 12% annual growth",
+        "Premium segment showing strongest growth potential",
+        "Limited competition in ultra-premium category"
+      ],
+      "recommendations": [
+        "Focus on premium market positioning",
+        "Expand into adjacent outdoor living categories",
+        "Develop strategic partnerships with luxury home builders"
+      ],
+      "factors": {
+        "Market_Size_Growth": {
+          "score": 78.9,
+          "confidence": 0.85,
+          "summary": "Strong market growth in premium outdoor living segment",
+          "key_insights": [
+            "Total market size: $8.2 billion",
+            "Premium segment growth: 15% annually"
+          ],
+          "recommendations": [
+            "Target premium segment aggressively",
+            "Invest in market expansion"
+          ],
+          "layers": {
+            "total_addressable_market": {
+              "score": 79.5,
+              "confidence": 0.86,
+              "calculation_method": "market_size_analysis",
+              "supporting_data": {
+                "market_size": 8200000000,
+                "growth_rate": 0.12,
+                "premium_segment": 0.25
+              },
+              "data_sources": [
+                "https://outdoor-living-market-report.com",
+                "https://industry-growth-analysis.org"
+              ],
+              "summary": "Large and growing market with $8.2B total size"
+            }
+          }
+        }
+      }
+    },
+    "PRODUCT": {
+      "score": 81.5,
+      "confidence": 0.87,
+      "trend": "up",
+      "priority": "medium",
+      "key_insights": [
+        "Superior product quality and craftsmanship",
+        "Innovative design features differentiate from competitors",
+        "Strong warranty and customer service"
+      ],
+      "recommendations": [
+        "Continue innovation in design and materials",
+        "Strengthen intellectual property protection",
+        "Maintain quality standards"
+      ],
+      "factors": {
+        "Features_Functionality": {
+          "score": 83.2,
+          "confidence": 0.88,
+          "summary": "Premium features and functionality exceed competitor offerings",
+          "key_insights": [
+            "Advanced weather protection systems",
+            "Modular design for customization"
+          ],
+          "recommendations": [
+            "Continue feature development",
+            "Patent key innovations"
+          ],
+          "layers": {
+            "core_features_analysis": {
+              "score": 84.1,
+              "confidence": 0.89,
+              "calculation_method": "feature_comparison_analysis",
+              "supporting_data": {
+                "feature_count": 18,
+                "unique_features": 7,
+                "competitor_average": 12
+              },
+              "data_sources": [
+                "https://product-feature-analysis.com",
+                "https://competitor-benchmarking.org"
+              ],
+              "summary": "18 total features with 7 unique differentiators"
+            }
+          }
+        }
+      }
+    },
+    "BRAND": {
+      "score": 72.4,
+      "confidence": 0.82,
+      "trend": "stable",
+      "priority": "medium",
+      "key_insights": [
+        "Strong brand recognition in local markets",
+        "Premium positioning well-established",
+        "Opportunity for national brand expansion"
+      ],
+      "recommendations": [
+        "Invest in national brand awareness",
+        "Develop consistent brand messaging",
+        "Expand digital marketing presence"
+      ],
+      "factors": {
+        "Brand_Awareness_Recognition": {
+          "score": 73.8,
+          "confidence": 0.83,
+          "summary": "Strong local brand recognition with opportunity for national expansion",
+          "key_insights": [
+            "85% recognition in primary markets",
+            "45% recognition in secondary markets"
+          ],
+          "recommendations": [
+            "Expand marketing to secondary markets",
+            "Develop national advertising strategy"
+          ],
+          "layers": {
+            "unaided_brand_recall": {
+              "score": 74.2,
+              "confidence": 0.84,
+              "calculation_method": "brand_recall_survey",
+              "supporting_data": {
+                "primary_market_recall": 0.85,
+                "secondary_market_recall": 0.45,
+                "national_average": 0.62
+              },
+              "data_sources": [
+                "https://brand-awareness-study.com",
+                "https://market-research-data.org"
+              ],
+              "summary": "Strong local recognition with room for national growth"
+            }
+          }
+        }
+      }
+    },
+    "EXPERIENCE": {
+      "score": 79.2,
+      "confidence": 0.85,
+      "trend": "up",
+      "priority": "high",
+      "key_insights": [
+        "Excellent customer service ratings",
+        "High customer satisfaction scores",
+        "Strong post-purchase support"
+      ],
+      "recommendations": [
+        "Maintain service excellence",
+        "Expand customer support channels",
+        "Develop loyalty programs"
+      ],
+      "factors": {
+        "User_Experience_UX_Design": {
+          "score": 80.1,
+          "confidence": 0.86,
+          "summary": "Superior user experience and design quality",
+          "key_insights": [
+            "4.8/5 customer satisfaction rating",
+            "95% would recommend to others"
+          ],
+          "recommendations": [
+            "Continue UX improvements",
+            "Gather customer feedback regularly"
+          ],
+          "layers": {
+            "onboarding_experience": {
+              "score": 81.5,
+              "confidence": 0.87,
+              "calculation_method": "customer_satisfaction_survey",
+              "supporting_data": {
+                "satisfaction_score": 4.8,
+                "recommendation_rate": 0.95,
+                "completion_rate": 0.92
+              },
+              "data_sources": [
+                "https://customer-satisfaction-survey.com",
+                "https://ux-research-data.org"
+              ],
+              "summary": "Excellent onboarding experience with 4.8/5 satisfaction"
+            }
+          }
+        }
+      }
+    }
+  },
+  "meta_scores": {
+    "market_fit": 78.5,
+    "innovation_score": 81.2,
+    "execution_readiness": 75.8,
+    "risk_index": 32.1,
+    "brand_strength": 71.4
+  },
+  "executive_summary": "The pergola business demonstrates strong strategic viability with comprehensive coverage of all strategic dimensions. The premium positioning strategy aligns well with market demand, and the product quality and customer experience are competitive advantages. Key opportunities include expanding national brand awareness and leveraging the growing outdoor living market trend.",
+  "key_recommendations": [
+    "Focus on premium positioning strategy",
+    "Invest in brand building through digital marketing",
+    "Develop intellectual property protection",
+    "Maintain customer experience excellence",
+    "Expand into adjacent outdoor living categories"
+  ],
+  "competitive_advantages": [
+    "Premium product quality with innovative features",
+    "Exceptional customer experience and service",
+    "Strong market demand alignment",
+    "Limited competition in ultra-premium segment",
+    "Superior craftsmanship and materials"
+  ],
+  "risk_factors": [
+    "Brand awareness below category leaders",
+    "Seasonal demand patterns",
+    "Premium pricing strategy limitations",
+    "Dependency on high-end housing market",
+    "Supply chain vulnerability for premium materials"
+  ],
+  "generated_at": "2025-08-29T12:48:37Z"
+}
