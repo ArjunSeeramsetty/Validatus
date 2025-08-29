@@ -150,16 +150,26 @@ class ContextAwareLangGraphWorkflow:
     
     def _extract_segment_factor(self, layer_name: str) -> tuple:
         """Extract segment and factor from context-aware layer name"""
-        # Handle context-aware naming: layer_segment_factor
-        parts = layer_name.split('_')
-        if len(parts) >= 3:
-            # Last two parts are factor and segment
-            factor = '_'.join(parts[-2:])
-            segment = parts[-1].upper()
-            return segment, factor
-        else:
-            # Fallback to default mapping
-            return "CONSUMER", "General Analysis"
+        # Use the actual framework structure to determine segment and factor
+        framework = self.analytical_framework.analytical_framework
+        
+        for segment, segment_data in framework.items():
+            for factor, layers in segment_data["factors"].items():
+                if layer_name in layers:
+                    return segment, factor
+        
+        # If not found in framework, try to extract from layer name
+        segments = ["CONSUMER", "MARKET", "PRODUCT", "BRAND", "EXPERIENCE"]
+        for segment in segments:
+            if segment.lower() in layer_name.lower():
+                # Try to extract factor from the layer name
+                factor_part = layer_name.lower().replace(segment.lower(), "").strip("_")
+                if factor_part:
+                    found_factor = factor_part.replace("_", " ").title()
+                    return segment, found_factor
+        
+        # Final fallback
+        return "CONSUMER", "General Analysis"
     
     def _get_default_persona(self, segment: str) -> str:
         """Get default persona for a segment"""

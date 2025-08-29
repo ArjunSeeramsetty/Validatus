@@ -140,124 +140,120 @@ class ComprehensiveAnalyticalFramework:
             "CONSUMER": {
                 "factors": {
                     "Consumer Demand & Need": [
-                        "need_perception_consumer_demand", "purchase_intent_consumer_demand", 
-                        "emotional_pull_consumer_demand", "unmet_needs_consumer_demand"
+                        "need_perception", "trust_level", "purchase_intent", "emotional_pull", "awareness",
+                        "social_influence", "accessibility", "value_perception", "trend_alignment", "price_sensitivity"
                     ],
                     "Consumer Behavior & Habits": [
-                        "shopping_habits_consumer_behavior", "media_consumption_consumer_behavior",
-                        "decision_making_process_consumer_behavior", "brand_interaction_consumer_behavior"
+                        "usage_frequency", "engagement_level", "habit_formation", "emotional_tie", "ease_of_access",
+                        "trust_in_usage", "interaction_rate", "perceived_value", "social_engagement", "incentives"
                     ],
                     "Consumer Loyalty & Retention": [
-                        "repeat_purchase_rate_consumer_loyalty", "churn_risk_consumer_loyalty",
-                        "advocacy_potential_consumer_loyalty", "loyalty_program_effectiveness_consumer_loyalty"
+                        "repeat_purchase", "trust_level_retention", "value_perception_loyalty", "advocacy", "social_loyalty",
+                        "emotional_bond", "switching_cost", "engagement_loyalty", "rewards", "access_loyalty"
                     ],
                     "Consumer Perception & Sentiment": [
-                        "overall_sentiment_consumer_perception", "quality_perception_consumer_perception",
-                        "trust_perception_consumer_perception", "value_for_money_consumer_perception"
+                        "sentiment", "quality_perception", "value_perception_sentiment", "innovation_perception", "trend_alignment_sentiment",
+                        "trust_perception", "prestige", "social_impact", "awareness_sentiment", "access_perception"
                     ],
                     "Consumer Adoption & Engagement": [
-                        "product_usage_frequency_consumer_adoption", "feature_adoption_rate_consumer_adoption",
-                        "community_engagement_consumer_adoption", "feedback_submission_rate_consumer_adoption"
+                        "adoption_rate", "trust_in_adoption", "value_perception_adoption", "frequency", "trend_alignment_adoption",
+                        "engagement_adoption", "social_influence_adoption", "emotional_pull_adoption", "accessibility_adoption", "incentives_adoption"
                     ]
                 },
                 "agent": "consumer_insights"
             },
             "MARKET": {
                 "factors": {
-                    "Market Size & Growth": [
-                        "total_addressable_market_market_size", "serviceable_addressable_market_market_size",
-                        "market_growth_rate_market_size", "future_projections_market_size"
+                    "market_trends": [
+                        "future_trends", "technological_shifts", "current_trends", "cultural_shift", "regulatory_shifts"
                     ],
-                    "Market Trends & Opportunities": [
-                        "emerging_trends_market_trends", "technological_shifts_market_trends",
-                        "white_space_opportunities_market_trends", "macroeconomic_factors_market_trends"
+                    "Market Competition and Barriers": [
+                        "rival_strength", "entry_barriers", "differentiation_advantage", "customer_switching_costs", "regulatory_barriers"
                     ],
-                    "Competitive Landscape": [
-                        "key_competitors_competitive_landscape", "market_share_distribution_competitive_landscape",
-                        "competitor_strengths_weaknesses_competitive_landscape", "rival_intensity_competitive_landscape"
+                    "Market Demand and Adoption": [
+                        "demand_volume", "demand_growth", "adoption_rate", "price_elasticity", "market_accessibility"
                     ],
-                    "Regulatory Environment": [
-                        "key_regulations_regulatory_environment", "compliance_requirements_regulatory_environment",
-                        "political_stability_regulatory_environment", "trade_policies_regulatory_environment"
+                    "Market Growth and Expansion": [
+                        "growth_potential", "regional_growth", "scalability_capacity", "investment_in_growth", "infrastructure_support"
                     ],
-                    "Market Risks & Challenges": [
-                        "economic_risks_market_risks", "competitive_threats_market_risks",
-                        "supply_chain_vulnerabilities_market_risks", "market_volatility_market_risks"
+                    "Market Stability and Risk": [
+                        "economic_stability", "political_stability", "supply_chain_stability", "risk_exposure", "regulatory_stability"
                     ]
                 },
                 "agent": "market_research"
             },
             "PRODUCT": {
                 "factors": {
-                    "Features & Functionality": [
-                        "core_features_analysis_features_functionality", "feature_completeness_features_functionality",
-                        "user_friendliness_features_functionality", "performance_reliability_features_functionality"
+                    "Product Market Readiness": [
+                        "entry_timing", "mid_cycle_impact", "market_saturation"
                     ],
-                    "Innovation & Differentiation": [
-                        "unique_selling_proposition_innovation_differentiation", "technological_innovation_innovation_differentiation",
-                        "design_innovation_innovation_differentiation", "patent_portfolio_innovation_differentiation"
+                    "Product Competitive Disruption": [
+                        "base_disruption", "incumbent_resistance", "response_time"
                     ],
-                    "Value Proposition": [
-                        "clarity_of_value_value_proposition", "problem_solution_fit_value_proposition",
-                        "cost_benefit_analysis_value_proposition", "emotional_benefits_value_proposition"
+                    "Product Dynamic Disruption": [
+                        "base_disruption_dynamic", "product_strength", "awareness_width", "value_perception_dynamic", 
+                        "adoption_growth", "error_perception", "retention_effect", "competitor_pull", "value_consistency"
                     ],
-                    "Business Resilience": [
-                        "supply_chain_resilience_business_resilience", "cost_structure_stability_business_resilience",
-                        "scalability_potential_business_resilience", "dependency_risks_business_resilience"
+                    "Product Business Resilience": [
+                        "profit_resilience", "expansion_growth"
                     ],
-                    "Product Quality & Assurance": [
-                        "defect_rate_product_quality", "customer_reported_issues_product_quality",
-                        "performance_benchmarks_product_quality", "compliance_standards_product_quality"
+                    "Product Hype Cycle": [
+                        "mid_cycle_buzz", "market_saturation_hype", "entry_timing_hype"
+                    ],
+                    "Product Quality Assurance": [
+                        "material_quality", "functional_quality", "brand_trust", "complaint_rate", "social_verdict"
+                    ],
+                    "Product Differentiation": [
+                        "tech_features", "competitor_strength"
+                    ],
+                    "Product Brand Perception": [
+                        "ad_reach", "organic_buzz"
+                    ],
+                    "Product Experience Design": [
+                        "visual_appeal", "haptic_feedback", "olfactory_appeal"
+                    ],
+                    "Product Innovation Lifecycle": [
+                        "market_fit", "entry_barrier", "tech_gap"
                     ]
                 },
                 "agent": "product_strategist"
             },
             "BRAND": {
                 "factors": {
-                    "Brand Awareness & Recognition": [
-                        "unaided_brand_recall_brand_awareness", "aided_brand_recognition_brand_awareness",
-                        "share_of_voice_brand_awareness", "social_media_presence_brand_awareness"
+                    "Brand Positioning Strategy": [
+                        "heritage_legacy", "innovation_edge", "public_perception", "exclusivity_factor", "competitor_edge"
                     ],
                     "Brand Equity Profile": [
-                        "brand_associations_brand_equity", "perceived_quality_brand_equity",
-                        "brand_loyalty_metrics_brand_equity", "brand_advocacy_brand_equity"
+                        "review_score", "social_sentiment", "legacy_trust", "ai_driven_trust", "crisis_handling"
                     ],
-                    "Brand Positioning Strategy": [
-                        "market_positioning_brand_positioning_strategy", "target_audience_alignment_brand_positioning_strategy",
-                        "competitive_differentiation_brand_positioning_strategy", "brand_story_clarity_brand_positioning_strategy"
-                    ],
-                    "Brand Messaging & Communication": [
-                        "message_consistency_brand_messaging", "tone_of_voice_brand_messaging",
-                        "channel_effectiveness_brand_messaging", "content_engagement_brand_messaging"
+                    "Brand Virality Impact": [
+                        "shareability_rate", "influencer_push", "platform_fit", "cultural_embed"
                     ],
                     "Brand Monetization Model": [
-                        "pricing_strategy_brand_monetization", "customer_lifetime_value_brand_monetization",
-                        "revenue_streams_brand_monetization", "profitability_analysis_brand_monetization"
+                        "direct_sales", "licensing_deals", "pricing_power", "revenue_diversification"
+                    ],
+                    "Brand Longevity Outlook": [
+                        "evolution_adapt", "generational_appeal", "resilience_factor", "esg_adaptation", "cultural_relevance"
                     ]
                 },
                 "agent": "brand_strategist"
             },
             "EXPERIENCE": {
                 "factors": {
-                    "User Experience (UX) & Design": [
-                        "onboarding_experience_user_experience_ux_design", "ease_of_use_user_experience_ux_design",
-                        "navigation_clarity_user_experience_ux_design", "visual_appeal_user_experience_ux_design"
+                    "User Engagement Metrics": [
+                        "attention_focus", "interaction_rate", "community_activity", "emotional_pull", "user_flow"
                     ],
-                    "Customer Journey Mapping": [
-                        "touchpoint_analysis_customer_journey_mapping", "friction_points_customer_journey_mapping",
-                        "emotional_journey_customer_journey_mapping", "channel_consistency_customer_journey_mapping"
+                    "Satisfaction Feedback": [
+                        "value_perception", "sentiment_feedback", "support_quality", "expectation_match"
                     ],
-                    "Customer Support & Service": [
-                        "first_response_time_customer_support_service", "resolution_rate_customer_support_service",
-                        "support_channel_effectiveness_customer_support_service", "agent_satisfaction_customer_support_service"
+                    "Interaction Design Elements": [
+                        "usability_ease", "intuitive_design", "sensory_appeal", "personalization", "access_inclusivity"
                     ],
-                    "Post-Purchase Loyalty & Advocacy": [
-                        "post_purchase_communication_post_purchase_loyalty_advocacy", "loyalty_program_engagement_post_purchase_loyalty_advocacy",
-                        "review_and_rating_behavior_post_purchase_loyalty_advocacy", "referral_rate_post_purchase_loyalty_advocacy"
+                    "Post-Purchase Loyalty": [
+                        "repeat_usage", "emotional_bond", "practical_retention", "advocacy_power", "incentive_reward"
                     ],
-                    "Customer Engagement & Community": [
-                        "community_activity_level_customer_engagement_community", "user_generated_content_customer_engagement_community",
-                        "brand_interaction_rate_customer_engagement_community", "event_participation_customer_engagement_community"
+                    "Experience Evolution": [
+                        "feature_updates", "trend_alignment", "cognitive_shift", "ai_adaptation"
                     ]
                 },
                 "agent": "ux_strategist"
@@ -655,6 +651,70 @@ class ComprehensiveAnalyticalFramework:
             "analysis_timestamp": datetime.now().isoformat()
         }
         
+        # Generate detailed layer-wise scores and summaries
+        layer_details = {}
+        for layer_name, layer_score in layer_scores.items():
+            layer_details[layer_name] = {
+                "score": layer_score.score,
+                "rationale": layer_score.rationale,
+                "source_attribution": {
+                    "source_type": layer_score.layer_type.value,
+                    "confidence": layer_score.confidence,
+                    "methodology": "Specialized agent analysis with persona-based prompting"
+                },
+                "timestamp": layer_score.timestamp.isoformat()
+            }
+        
+        # Generate detailed factor-wise scores and summaries
+        factor_details = {}
+        for factor_key, factor_score in factor_scores.items():
+            factor_details[factor_key] = {
+                "score": factor_score.score,
+                "rationale": factor_score.rationale,
+                "calculation_method": factor_score.calculation_method,
+                "contributing_layers": factor_score.contributing_layers,
+                "confidence": factor_score.confidence,
+                "timestamp": factor_score.timestamp.isoformat()
+            }
+        
+        # Generate detailed segment-wise scores and summaries
+        segment_details = {}
+        for segment_name, segment_score in segment_scores.items():
+            segment_details[segment_name] = {
+                "score": segment_score.score,
+                "rationale": segment_score.rationale,
+                "calculation_method": segment_score.calculation_method,
+                "contributing_factors": segment_score.contributing_factors,
+                "confidence": segment_score.confidence,
+                "timestamp": segment_score.timestamp.isoformat()
+            }
+        
+        # Generate comprehensive strategic insights
+        strategic_insights = {
+            "key_strengths": [],
+            "critical_risks": [],
+            "market_opportunities": [],
+            "competitive_advantages": [],
+            "implementation_recommendations": []
+        }
+        
+        # Analyze high-scoring areas for strengths and opportunities
+        high_scoring_layers = [layer for layer in layer_scores.values() if layer.score >= 8.0]
+        if high_scoring_layers:
+            strategic_insights["key_strengths"].append(f"Strong performance in {len(high_scoring_layers)} strategic layers")
+            strategic_insights["competitive_advantages"].append(f"Competitive edge in {len(high_scoring_layers)} key areas")
+        
+        # Analyze low-scoring areas for risks and improvement opportunities
+        low_scoring_layers = [layer for layer in layer_scores.values() if layer.score <= 3.0]
+        if low_scoring_layers:
+            strategic_insights["critical_risks"].append(f"Critical improvement needed in {len(low_scoring_layers)} areas")
+            strategic_insights["implementation_recommendations"].append(f"Prioritize improvements in {len(low_scoring_layers)} low-scoring layers")
+        
+        # Analyze segment performance for opportunities
+        high_scoring_segments = [name for name, score in segment_scores.items() if score.score >= 8.0]
+        if high_scoring_segments:
+            strategic_insights["market_opportunities"].append(f"Strong market position in {', '.join(high_scoring_segments)} segments")
+        
         return {
             "overall_viability_score": round(overall_score, 1),
             "execution_details": execution_details,
@@ -669,7 +729,13 @@ class ComprehensiveAnalyticalFramework:
                 "risk_level": risk_level,
                 "critical_areas": critical_areas,
                 "strength_areas": strength_areas
-            }
+            },
+            "detailed_analysis": {
+                "layer_scores": layer_details,
+                "factor_scores": factor_details,
+                "segment_scores": segment_details
+            },
+            "strategic_insights": strategic_insights
         }
 
     def get_all_layers(self) -> List[str]:

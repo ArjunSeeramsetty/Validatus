@@ -32,6 +32,13 @@ async def run_analysis(analysis_id: str):
     try:
         initial_state = analysis_store[analysis_id]
         
+        # Update status to show it's running
+        analysis_store[analysis_id] = {
+            "status": "RUNNING",
+            "progress": 10,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
         # Execute the workflow using the current workflow instance
         result = await validatus_workflow.execute(
             idea_description=initial_state.idea_description,
@@ -51,6 +58,7 @@ async def run_analysis(analysis_id: str):
         if analysis_id in analysis_store:
             analysis_store[analysis_id]["status"] = "FAILED"
             analysis_store[analysis_id]["errors"] = analysis_store[analysis_id].get("errors", []) + [f"Workflow execution error: {str(e)}"]
+        print(f"Error in run_analysis: {str(e)}")  # Debug output
 
 @app.post("/api/v1/analysis", response_model=AnalysisResponse)
 async def create_analysis(request: AnalysisRequest, background_tasks: BackgroundTasks):
