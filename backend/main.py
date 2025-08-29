@@ -40,7 +40,12 @@ async def run_analysis(analysis_id: str):
         )
         
         # Update the store with results
-        analysis_store[analysis_id] = result
+        analysis_store[analysis_id] = {
+            "status": "COMPLETED",
+            "progress": 100,
+            "dashboard_data": result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
 
     except Exception as e:
         if analysis_id in analysis_store:
@@ -54,7 +59,7 @@ async def create_analysis(request: AnalysisRequest, background_tasks: Background
     
     initial_state = ValidatusState(
         idea_description=request.query,
-        target_audience=request.context.get("target_audience", "General audience"),
+        target_audience=request.context.target_audience,
         additional_context=request.context.dict()
     )
     
@@ -94,6 +99,7 @@ async def get_analysis_results(analysis_id: str):
     return state.get("dashboard_data", {})
 
 @app.get("/health")
+@app.get("/api/v1/health")
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}

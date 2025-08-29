@@ -246,24 +246,24 @@ class ValidatusTestSuite:
             orchestrator = MultiLLMOrchestrator()
             
             print(f"✅ Multi-LLM orchestrator initialized")
-            print(f"🔧 LLM providers: {len(orchestrator.llm_providers)}")
+            print(f"🔧 LLM agents: {len(orchestrator.llm_agents)}")
             
             # Test LLM priority chain
-            priority_chain = ["gemini", "perplexity", "openai", "anthropic"]
+            priority_chain = ["google_gemini", "perplexity_sonar", "openai_gpt4", "anthropic_claude"]
             print(f"📋 LLM Priority Chain: {' → '.join(priority_chain)}")
             
             # Test configuration
             for provider in priority_chain:
-                if provider in orchestrator.llm_providers:
-                    config = orchestrator.llm_providers[provider]
-                    model = config.get("model", "Unknown")
+                if provider in orchestrator.llm_agents:
+                    agent = orchestrator.llm_agents[provider]
+                    model = getattr(agent, 'model', 'Unknown')
                     print(f"   ✅ {provider}: {model}")
                 else:
                     print(f"   ⚠️ {provider}: Not configured")
             
             self.test_results["multi_llm_orchestration"] = {
                 "status": "PASSED",
-                "providers": len(orchestrator.llm_providers),
+                "agents": len(orchestrator.llm_agents),
                 "priority_chain": priority_chain
             }
             
@@ -287,7 +287,7 @@ class ValidatusTestSuite:
             print(f"🔗 Context-aware layers: {len(workflow.layer_contexts)}")
             
             # Test workflow structure
-            workflow_nodes = list(workflow.workflow.nodes.keys())
+            workflow_nodes = list(workflow.graph.nodes.keys())
             print(f"📊 Workflow nodes: {', '.join(workflow_nodes)}")
             
             # Test state creation
