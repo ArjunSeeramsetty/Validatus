@@ -55,9 +55,9 @@ export const SegmentDashboard: React.FC<Props> = ({
           
           <div className="flex items-center space-x-6">
             <div className="text-center">
-              <ProgressRing 
-                percentage={Math.round(segment.score)} 
-                size={80}
+              <ProgressRing
+                value={Math.round(segment.score)}
+                size={120}
                 strokeWidth={8}
                 className="text-blue-600"
               />

@@ -27,6 +27,16 @@ export const OverviewDashboard: React.FC<Props> = ({
   performanceMetrics, 
   onDrillDown 
 }) => {
+  // Add defensive checks
+  if (!data || !data.segments || !data.meta_scores) {
+    console.error('OverviewDashboard: Missing required data:', { data, segments: data?.segments, meta_scores: data?.meta_scores });
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">Error: Missing required data for dashboard</p>
+      </div>
+    );
+  }
+
   const segmentData = Object.entries(data.segments).map(([name, segment]) => ({
     name: name.replace('_', ' ').toUpperCase(),
     score: segment.score,

@@ -72,11 +72,11 @@ export const LayerDashboard: React.FC<Props> = ({
           
           <div className="flex items-center space-x-6">
             <div className="text-center">
-              <ProgressRing 
-                percentage={Math.round(layer.score)} 
-                size={80}
+              <ProgressRing
+                value={Math.round(layer.score)}
+                size={120}
                 strokeWidth={8}
-                className={getScoreColor(layer.score)}
+                className="text-blue-600"
               />
               <div className="text-sm text-gray-600 mt-1">Layer Score</div>
             </div>

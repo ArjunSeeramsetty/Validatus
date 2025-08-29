@@ -59,11 +59,11 @@ export const FactorDashboard: React.FC<Props> = ({
           
           <div className="flex items-center space-x-6">
             <div className="text-center">
-              <ProgressRing 
-                percentage={Math.round(factor.score)} 
-                size={80}
+              <ProgressRing
+                value={Math.round(factor.score)}
+                size={120}
                 strokeWidth={8}
-                className="text-green-600"
+                className="text-blue-600"
               />
               <div className="text-sm text-gray-600 mt-1">Factor Score</div>
             </div>

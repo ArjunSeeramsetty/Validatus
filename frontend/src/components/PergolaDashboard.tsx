@@ -22,7 +22,29 @@ interface Props {
 
 export const PergolaDashboard: React.FC<Props> = ({ data }) => {
   console.log('PergolaDashboard rendered with data:', data);
+  console.log('PergolaDashboard: Data validation:', {
+    hasData: !!data,
+    hasSegments: !!data?.segments,
+    segmentCount: Object.keys(data?.segments || {}).length,
+    hasMetaScores: !!data?.meta_scores,
+    metaScoreCount: Object.keys(data?.meta_scores || {}).length,
+    overallScore: data?.overall_score,
+    overallConfidence: data?.overall_confidence
+  });
   
+  // Add defensive checks
+  if (!data || !data.segments) {
+    console.error('PergolaDashboard: Missing required data:', data);
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">Error: Missing required data for dashboard</p>
+        <pre className="text-xs mt-2 text-left bg-gray-100 p-2 rounded">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      </div>
+    );
+  }
+
   const [drillDownState, setDrillDownState] = useState<DrillDownState>({
     level: 'overview',
     breadcrumb: [{ level: 'overview', name: 'Pergola Case Analysis', path: '/' }]

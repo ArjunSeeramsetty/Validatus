@@ -34,6 +34,7 @@ export const AnalysisSelector: React.FC<Props> = ({ onAnalysisSelect, onNewAnaly
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Load mock analyses
   useEffect(() => {
@@ -217,6 +218,7 @@ export const AnalysisSelector: React.FC<Props> = ({ onAnalysisSelect, onNewAnaly
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setIsUploading(true);
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
@@ -225,6 +227,8 @@ export const AnalysisSelector: React.FC<Props> = ({ onAnalysisSelect, onNewAnaly
         } catch (error) {
           console.error('Failed to parse analysis file:', error);
           alert('Invalid analysis file format. Please upload a valid JSON file.');
+        } finally {
+          setIsUploading(false);
         }
       };
       reader.readAsText(file);
@@ -285,13 +289,23 @@ export const AnalysisSelector: React.FC<Props> = ({ onAnalysisSelect, onNewAnaly
           </button>
           
           <label className="flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors cursor-pointer">
-            <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
-            Upload Analysis File
+            {isUploading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Processing...
+              </>
+            ) : (
+              <>
+                <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
+                Upload Analysis File
+              </>
+            )}
             <input
               type="file"
               accept=".json"
               onChange={handleFileUpload}
               className="hidden"
+              disabled={isUploading}
             />
           </label>
         </div>
