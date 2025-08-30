@@ -130,8 +130,29 @@ export interface LayerScore {
   timestamp: string;
 }
 
+// New hierarchical structure
+export interface Factor {
+  factor_name: string;
+  overall_score: number;
+  summary: string;
+  layers: Record<string, LayerScore>;
+  factor_insights: string[];
+  recommendations: string[];
+}
+
+export interface Segment {
+  segment_name: string;
+  overall_score: number;
+  summary: string;
+  factors: Record<string, Factor>;
+  segment_insights: string[];
+  strategic_priorities: string[];
+}
+
 export interface DetailedAnalysis {
-  layer_scores: Record<string, LayerScore>;
+  segments: Record<string, Segment>;
+  // Keep backward compatibility
+  layer_scores?: Record<string, LayerScore>;
 }
 
 export interface AnalysisResult {
@@ -140,6 +161,6 @@ export interface AnalysisResult {
   analysis_results: AnalysisResults;
   progress_summary: ProgressSummary;
   strategic_insights: StrategicInsights;
-  detailed_analysis?: DetailedAnalysis; // Optional since it might not exist
+  detailed_analysis: DetailedAnalysis;
 }
 
