@@ -7,10 +7,12 @@ export const Dashboard: React.FC = () => {
   
   const [query, setQuery] = useState('');
   const [context, setContext] = useState<AnalysisContext>({
+    business_case: '',
     industry: '',
     geography: [],
     company_stage: '',
-    target_audience: ''
+    target_audience: '',
+    timeline: ''
   });
 
   const handleStartAnalysis = async () => {
@@ -38,10 +40,12 @@ export const Dashboard: React.FC = () => {
   const handleReset = () => {
     setQuery('');
     setContext({
+      business_case: '',
       industry: '',
       geography: [],
       company_stage: '',
-      target_audience: ''
+      target_audience: '',
+      timeline: ''
     });
     setError(null);
   };

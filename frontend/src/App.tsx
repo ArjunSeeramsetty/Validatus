@@ -1,48 +1,41 @@
 import React, { useState } from 'react';
-import { Dashboard } from './components/dashboard/Dashboard';
-import { AnalysisDashboard } from './components/AnalysisDashboard';
 import HomePage from './components/HomePage';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { AnalysisDashboard } from './components/AnalysisDashboard';
+import { AnalysisResult } from './types/analysis';
 
 function App() {
-  // View states: 'home', 'form', 'dashboard'
-  const [currentView, setCurrentView] = useState<'home' | 'form' | 'dashboard'>('home');
-  const [analysisData, setAnalysisData] = useState<any | null>(null);
+  const [currentView, setCurrentView] = useState<'home' | 'dashboard'>('home');
+  const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null);
 
-  const handleStartNew = () => {
-    setCurrentView('form');
-  };
-
-  const handleLoadAnalysis = (data: any) => {
+  const handleFileUpload = (data: AnalysisResult) => {
     setAnalysisData(data);
     setCurrentView('dashboard');
   };
-  
+
   const handleGoHome = () => {
-    setAnalysisData(null);
     setCurrentView('home');
+    setAnalysisData(null);
   };
 
-  const renderContent = () => {
-    switch (currentView) {
-      case 'form':
-        return <Dashboard />;
-      case 'dashboard':
-        return <AnalysisDashboard analysisData={analysisData} onGoHome={handleGoHome} />;
-      case 'home':
-      default:
-        return <HomePage onStartNewAnalysis={handleStartNew} onLoadAnalysis={handleLoadAnalysis} />;
-    }
+  const handleStartNewAnalysis = () => {
+    // TODO: Implement new analysis flow
+    console.log('Starting new analysis...');
   };
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gray-100">
-        <main>
-          {renderContent()}
-        </main>
-      </div>
-    </ErrorBoundary>
+    <div className="min-h-screen bg-gray-50">
+      {currentView === 'home' ? (
+        <HomePage 
+          onStartNewAnalysis={handleStartNewAnalysis}
+          onLoadAnalysis={handleFileUpload}
+        />
+      ) : (
+        <AnalysisDashboard 
+          analysisData={analysisData!}
+          onGoHome={handleGoHome}
+        />
+      )}
+    </div>
   );
 }
 

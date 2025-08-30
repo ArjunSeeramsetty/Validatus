@@ -9,6 +9,7 @@ interface AnalysisFormProps {
 export const AnalysisForm: React.FC<AnalysisFormProps> = ({ onSubmit, isLoading }) => {
   const [query, setQuery] = useState('');
   const [context, setContext] = useState<AnalysisContext>({
+    business_case: '',
     industry: '',
     geography: [],
     company_stage: '',
