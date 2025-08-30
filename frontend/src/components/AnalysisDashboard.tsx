@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { AnalysisResult } from '../types/analysis';
+import { TransformedAnalysis } from '../utils/dataTransformation';
 import OverviewDashboard from './dashboard/OverviewDashboard';
 import SegmentsDashboard from './dashboard/SegmentsDashboard';
 import DrillDownView from './dashboard/DrillDownView';
 
 interface AnalysisDashboardProps {
-  analysisData: AnalysisResult;
+  analysisData: TransformedAnalysis | null;
   onGoHome: () => void;
 }
 
@@ -24,25 +24,26 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({
 
   // Add debugging
   console.log('AnalysisDashboard received analysisData:', analysisData);
-  console.log('AnalysisDashboard data structure:', {
-    hasData: !!analysisData,
-    hasAnalysisMetadata: !!analysisData?.analysis_metadata,
-    hasBusinessCase: !!analysisData?.business_case,
-    hasAnalysisResults: !!analysisData?.analysis_results,
-    hasDetailedAnalysis: !!analysisData?.detailed_analysis,
-    hasLayerScores: !!analysisData?.detailed_analysis?.layer_scores,
-    layerKeys: analysisData?.detailed_analysis?.layer_scores ? Object.keys(analysisData.detailed_analysis.layer_scores) : []
-  });
   
-  // Add detailed data inspection
-  console.log('Full data object keys:', Object.keys(analysisData || {}));
-  console.log('Data type:', typeof analysisData);
-  console.log('Data constructor:', analysisData?.constructor?.name);
-  console.log('Is array:', Array.isArray(analysisData));
-  console.log('Data stringified:', JSON.stringify(analysisData, null, 2).substring(0, 1000) + '...');
+  if (!analysisData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Analysis Data</h2>
+          <p className="text-gray-600 mb-4">Please upload an analysis file or start a new analysis.</p>
+          <button
+            onClick={onGoHome}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            ← Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const handleDrillDown = (layerName: string) => {
-    setDrillDownState({ level: 'factor', segmentName: 'analysis', layerName, factorName: layerName });
+  const handleDrillDown = (level: 'segments' | 'factor', segmentName?: string, factorName?: string, layerName?: string) => {
+    setDrillDownState({ level, segmentName, factorName, layerName });
   };
 
   const handleGoBack = () => {
@@ -63,12 +64,11 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({
           />
         );
       case 'factor':
-        if (drillDownState.segmentName && drillDownState.layerName && drillDownState.factorName) {
+        if (drillDownState.segmentName && drillDownState.factorName) {
           return (
             <DrillDownView 
               data={analysisData}
               segmentName={drillDownState.segmentName}
-              layerName={drillDownState.layerName}
               factorName={drillDownState.factorName}
               onGoBack={handleGoBack}
             />
@@ -100,32 +100,24 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({
         <div className="flex items-center space-x-6">
           <button
             onClick={() => setDrillDownState({ level: 'overview' })}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-2 rounded-lg font-medium transition-colors ${
               drillDownState.level === 'overview'
                 ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Overview
           </button>
           <button
             onClick={() => setDrillDownState({ level: 'segments' })}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-2 rounded-lg font-medium transition-colors ${
               drillDownState.level === 'segments'
                 ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Layer Analysis
+            Segments Analysis
           </button>
-          {drillDownState.level === 'factor' && (
-            <button
-              onClick={handleGoBack}
-              className="px-4 py-2 rounded-lg font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-            >
-              ← Back to Layers
-            </button>
-          )}
         </div>
       </div>
 
