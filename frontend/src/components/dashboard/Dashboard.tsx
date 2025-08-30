@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
-import { useAnalysisStore } from '../../stores/analysisStore';
+import useAnalysisStore from '../../stores/analysisStore';
 import { AnalysisContext } from '../../types/analysis';
 
 export const Dashboard: React.FC = () => {
-  const { 
-    currentAnalysis, 
-    startAnalysis, 
-    analysisStatus, 
-    segmentScores,
-    isLoading,
-    error,
-    resetAnalysis
-  } = useAnalysisStore();
+  const { isLoading, error, setLoading, setError } = useAnalysisStore();
   
   const [query, setQuery] = useState('');
   const [context, setContext] = useState<AnalysisContext>({
@@ -23,15 +15,27 @@ export const Dashboard: React.FC = () => {
 
   const handleStartAnalysis = async () => {
     if (query.trim() && context.industry) {
-      await startAnalysis({
-        query,
-        context
-      });
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // For now, we'll just show a message that this would connect to the real API
+        // In a real implementation, this would make an actual API call to start analysis
+        alert('Analysis started! This would connect to the real backend API to generate analysis results. For now, please use the "Visualize Report" option to upload an existing analysis JSON file.');
+        
+        // Don't set mock data - only work with real uploaded files
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Failed to start analysis');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   const handleReset = () => {
-    resetAnalysis();
     setQuery('');
     setContext({
       industry: '',
@@ -39,6 +43,7 @@ export const Dashboard: React.FC = () => {
       company_stage: '',
       target_audience: ''
     });
+    setError(null);
   };
 
   return (
@@ -115,9 +120,9 @@ export const Dashboard: React.FC = () => {
               >
                 <option value="">Select stage</option>
                 <option value="startup">Startup</option>
-                <option value="scaleup">Scale-up</option>
-                <option value="enterprise">Enterprise</option>
+                <option value="growth">Growth</option>
                 <option value="mature">Mature</option>
+                <option value="enterprise">Enterprise</option>
               </select>
             </div>
             
@@ -129,101 +134,46 @@ export const Dashboard: React.FC = () => {
                 type="text"
                 value={context.target_audience}
                 onChange={(e) => setContext({...context, target_audience: e.target.value})}
-                placeholder="e.g., Enterprise customers, B2B, Consumers"
+                placeholder="e.g., B2B, B2C, Enterprise"
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex space-x-4">
             <button
               onClick={handleStartAnalysis}
-              disabled={!query.trim() || !context.industry || isLoading}
-              className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={isLoading || !query.trim() || !context.industry}
+              className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Starting Analysis...' : 'Start Analysis'}
             </button>
             
-            {currentAnalysis && (
-              <button
-                onClick={handleReset}
-                className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600"
-              >
-                Reset
-              </button>
-            )}
+            <button
+              onClick={handleReset}
+              className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600"
+            >
+              Reset
+            </button>
           </div>
         </div>
 
-        {/* Analysis Status */}
-        {currentAnalysis && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <h3 className="text-lg font-semibold mb-4">Analysis Progress</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span>Status:</span>
-                <span className={`px-3 py-1 rounded-full text-sm ${
-                  analysisStatus === 'completed' ? 'bg-green-100 text-green-800' :
-                  analysisStatus === 'failed' ? 'bg-red-100 text-red-800' :
-                  analysisStatus === 'researching' ? 'bg-blue-100 text-blue-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {analysisStatus}
-                </span>
-              </div>
-              
-              {analysisStatus !== 'completed' && analysisStatus !== 'failed' && (
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                    style={{width: `${currentAnalysis.progress}%`}}
-                  ></div>
-                </div>
-              )}
-              
-              <div className="text-sm text-gray-600">
-                Analysis ID: {currentAnalysis.analysis_id}
+        {/* Info Message */}
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">Note</h3>
+              <div className="mt-2 text-sm text-blue-700">
+                <p>This form is for demonstration purposes. To view actual analysis results, please use the "Visualize Report" option from the home page to upload an existing analysis JSON file.</p>
               </div>
             </div>
           </div>
-        )}
-
-        {/* Results Dashboard */}
-        {analysisStatus === 'completed' && segmentScores && (
-          <div className="space-y-8">
-            {/* Segment Overview */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">Strategic Overview</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(segmentScores).map(([segment, data]: [string, any]) => (
-                  <div key={segment} className="border rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-2">{segment}</h4>
-                    <div className="text-2xl font-bold text-blue-600 mb-2">
-                      {data.score}/100
-                    </div>
-                    <div className="text-sm text-gray-600 mb-2">
-                      Confidence: {(data.confidence * 100).toFixed(0)}%
-                    </div>
-                    <p className="text-sm text-gray-700">{data.summary}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recommendations */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">Strategic Recommendations</h3>
-              <div className="space-y-3">
-                {useAnalysisStore.getState().recommendations.map((recommendation, index) => (
-                  <div key={index} className="flex items-start">
-                    <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3"></div>
-                    <p className="text-gray-700">{recommendation}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
